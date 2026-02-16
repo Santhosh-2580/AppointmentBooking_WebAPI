@@ -1,0 +1,14 @@
+﻿using AppointmentBooking.Domain.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AppointmentBooking.Domain.Corntracts
+{
+    public interface IDoctorRepository : IGenericRepository<Doctor>
+    {
+        Task UpdateAsync(Doctor doctor);
+    }
+}
