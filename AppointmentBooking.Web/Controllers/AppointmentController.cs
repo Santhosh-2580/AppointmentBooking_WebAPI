@@ -1,8 +1,12 @@
-﻿using AppointmentBooking.Application.DTO.Appointment;
+﻿using AppointmentBooking.Application.ApplicationConstants;
+using AppointmentBooking.Application.Common;
+using AppointmentBooking.Application.DTO.Appointment;
 using AppointmentBooking.Application.Services;
 using AppointmentBooking.Application.Services.Interface;
+using AppointmentBooking.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace AppointmentBooking.Web.Controllers
 {
@@ -11,33 +15,62 @@ namespace AppointmentBooking.Web.Controllers
     public class AppointmentController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
+        protected APIResponse _response;
         public AppointmentController(IAppointmentService appointmentService)
         {
             _appointmentService = appointmentService;
+            _response = new APIResponse();
         }
 
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<ActionResult> AddAppointment([FromBody] CreateAppointmentDto Appointment)
+        public async Task<ActionResult<APIResponse>> AddAppointment([FromBody] CreateAppointmentDto Appointment)
         {
-
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.CreateOperationFailed;
+                    _response.AddError(ModelState.ToString());
+                }
+
+                var createdAppointment = await _appointmentService.CreateAppointmentAsync(Appointment);
+
+                _response.StatusCode = HttpStatusCode.Created;
+                _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
+                _response.IsSuccess = true;
+                _response.Result = createdAppointment;
             }
+            catch   (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.CreateOperationFailed;
+                _response.AddError(CommonMessages.SystemError);
+            }           
 
-            var createdAppointment = await _appointmentService.CreateAppointmentAsync(Appointment);
-
-            return Ok(new { Message = "Appointment added successfully", Appointment = createdAppointment });
+            return Ok(_response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<ActionResult> GetAppointments()
         {
-            var Appointments = await _appointmentService.GetAllAppointmentsAsync();
-            return Ok(Appointments);
+            try
+            {
+                var Appointments = await _appointmentService.GetAllAppointmentsAsync();
+
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                _response.Result = Appointments;
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;                
+                _response.AddError(CommonMessages.SystemError);
+            }
+
+            return Ok(_response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -45,12 +78,24 @@ namespace AppointmentBooking.Web.Controllers
         [Route("Filter")]
         public async Task<ActionResult> GetAppointmentsByFilter(int? doctorId, int? patientId)
         {
-            var Appointments = await _appointmentService.GetAppointmentsByFilterAsync(doctorId,patientId);
-            return Ok(Appointments);
+            try
+            {
+                var Appointments = await _appointmentService.GetAppointmentsByFilterAsync(doctorId, patientId);
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                _response.Result = Appointments;
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.AddError(CommonMessages.SystemError);
+            }
+
+            return StatusCode((int)_response.StatusCode, _response);
+
         }
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]      
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult> GetAppointmentById(int id)
@@ -66,9 +111,7 @@ namespace AppointmentBooking.Web.Controllers
             return Ok(Appointment);
         }
 
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPatch("{id}")]
         public async Task<ActionResult> UpdateAppointment(int id, UpdateAppointmentDto doctor)
         {
@@ -84,9 +127,7 @@ namespace AppointmentBooking.Web.Controllers
 
         }
 
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpDelete]
         public async Task<ActionResult> DeleteAppointment(int id)
         {

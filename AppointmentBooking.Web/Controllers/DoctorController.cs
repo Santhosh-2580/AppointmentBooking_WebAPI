@@ -1,9 +1,12 @@
-﻿using AppointmentBooking.Application.DTO.Doctor;
+﻿using AppointmentBooking.Application.ApplicationConstants;
+using AppointmentBooking.Application.Common;
+using AppointmentBooking.Application.DTO.Doctor;
 using AppointmentBooking.Application.Services.Interface;
 using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace AppointmentBooking.Web.Controllers
@@ -14,94 +17,166 @@ namespace AppointmentBooking.Web.Controllers
     {
 
         private readonly IDoctorService _doctorService;
+        protected APIResponse _response;
 
         public DoctorController(IDoctorService doctorService)
         {
             _doctorService = doctorService;
+            _response = new APIResponse();
         }
 
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]       
         [HttpPost]
-        public async Task<ActionResult> AddDoctor([FromBody] CreateDoctorDto doctor)
+        public async Task<ActionResult<APIResponse>> AddDoctor([FromBody] CreateDoctorDto doctor)
         {
-
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.CreateOperationFailed;
+                    _response.AddError(ModelState.ToString());                    
+                }
+
+                var createdDoctor = await _doctorService.CreateDoctorAsync(doctor);
+
+                _response.StatusCode = HttpStatusCode.Created;
+                _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
+                _response.IsSuccess = true;
+                _response.Result = createdDoctor;
+
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.CreateOperationFailed;
+                _response.AddError(CommonMessages.SystemError);
             }
 
-            var createdDoctor = await _doctorService.CreateDoctorAsync(doctor);
-
-            return Ok(new { Message = "Doctor added successfully", Doctor = createdDoctor });
+            return StatusCode((int)_response.StatusCode, _response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
-        public async Task<ActionResult> GetDoctors()
+        public async Task<ActionResult<APIResponse>> GetDoctors()
         {
-            var doctors = await _doctorService.GetAllDoctorsAsync();
+            try
+            {
 
-            return Ok(doctors);
+                var doctors = await _doctorService.GetAllDoctorsAsync();
+
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                _response.Result = doctors;
+            }
+            catch (Exception)
+            { 
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.AddError(CommonMessages.SystemError);
+            }
+
+
+            return StatusCode((int)_response.StatusCode, _response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult> GetDoctorById(int id)
+        public async Task<ActionResult<APIResponse>> GetDoctorById(int id)
         {
-            var doctor = await _doctorService.GetDoctorByIdAsync(id);
-
-            if (doctor == null)
+            try 
             {
+                var doctor = await _doctorService.GetDoctorByIdAsync(id);
 
-                return NotFound(new { Message = $"Record not found for Id - {id}" });
+                if (doctor == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.DisplayMessage = CommonMessages.RecordNotFound;
+                }
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                _response.Result = doctor;
+
             }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.AddError(CommonMessages.SystemError);
+            }
+            return StatusCode((int)_response.StatusCode, _response);
 
-            return Ok(doctor);
         }
 
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPatch("{id}")]
-        public async Task<ActionResult> UpdateDoctor(int id, UpdateDoctorDto doctor)
+        public async Task<ActionResult<APIResponse>> UpdateDoctor(int id, UpdateDoctorDto doctor)
         {
 
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+                    _response.AddError(ModelState.ToString());
+                }
+
+                await _doctorService.UpdateDoctorAsync(id, doctor);
+
+                _response.StatusCode = HttpStatusCode.Created;
+                _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
+                _response.IsSuccess = true;
+                
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+                _response.AddError(CommonMessages.SystemError);
             }
 
-           await _doctorService.UpdateDoctorAsync(id,doctor);
 
-            return NoContent();
+            return StatusCode((int)_response.StatusCode, _response);
 
         }
 
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpDelete]
         public async Task<ActionResult> DeleteDoctor(int id)
         {
-
-            if (id == 0)
+            try
             {
-                return BadRequest(ModelState);
+                if (id == 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+                    _response.AddError(ModelState.ToString());
+                }
+
+                var doctor = await _doctorService.GetDoctorByIdAsync(id);
+
+                if (doctor == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.DisplayMessage = CommonMessages.RecordNotFound;
+                    _response.AddError(ModelState.ToString());
+                }
+
+                await _doctorService.DeleteDoctorAsync(id);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+                _response.IsSuccess = true;
+
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+                _response.AddError(CommonMessages.SystemError);
             }
 
-            var doctor = await _doctorService.GetDoctorByIdAsync(id);
-
-            if (doctor == null)
-            {
-                return NotFound(new { Message = $"Record not found for Id - {id}" });
-            }
-
-           await _doctorService.DeleteDoctorAsync(id);
-
-            return NoContent();
+            return StatusCode((int)_response.StatusCode, _response);
 
         }
     }
