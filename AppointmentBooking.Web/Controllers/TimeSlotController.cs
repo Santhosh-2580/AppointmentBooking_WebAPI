@@ -38,13 +38,16 @@ namespace AppointmentBooking.Web.Controllers
                     _response.DisplayMessage = CommonMessages.CreateOperationFailed;
                     _response.AddError(ModelState.ToString());
                 }
+                else
+                {
+                    var createdTimeSlot = await _timeSlotService.CreateTimeSlotAsync(TimeSlot);
 
-                var createdTimeSlot = await _timeSlotService.CreateTimeSlotAsync(TimeSlot);
-
-                _response.StatusCode = HttpStatusCode.Created;
-                _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
-                _response.IsSuccess = true;
-                _response.Result = createdTimeSlot;
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
+                    _response.IsSuccess = true;
+                    _response.Result = createdTimeSlot;
+                }
+                   
             }
             catch (Exception)
             {
@@ -113,10 +116,12 @@ namespace AppointmentBooking.Web.Controllers
                     _response.StatusCode = HttpStatusCode.NotFound;
                     _response.DisplayMessage = CommonMessages.RecordNotFound;
                 }
-
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.IsSuccess = true;
-                _response.Result = TimeSlot;
+                else
+                {
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.IsSuccess = true;
+                    _response.Result = TimeSlot;
+                }               
 
             }
             catch (Exception)
@@ -140,12 +145,15 @@ namespace AppointmentBooking.Web.Controllers
                     _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
                     _response.AddError(ModelState.ToString());
                 }
+                else
+                {
+                    await _timeSlotService.UpdateTimeSlotAsync(id, doctor);
 
-                await _timeSlotService.UpdateTimeSlotAsync(id, doctor);
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
+                    _response.IsSuccess = true;
+                }
 
-                _response.StatusCode = HttpStatusCode.Created;
-                _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
-                _response.IsSuccess = true;
             }
             catch(Exception)
             {
@@ -159,7 +167,7 @@ namespace AppointmentBooking.Web.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<ActionResult<APIResponse>> DeleteTimeSlot(int id)
         {
 
@@ -171,21 +179,25 @@ namespace AppointmentBooking.Web.Controllers
                     _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
                     _response.AddError(ModelState.ToString());
                 }
-
-                var doctor = await _timeSlotService.GetTimeSlotByIdAsync(id);
-
-                if (doctor == null)
+                else
                 {
-                    _response.StatusCode = HttpStatusCode.NotFound;
-                    _response.DisplayMessage = CommonMessages.RecordNotFound;
-                    _response.AddError(ModelState.ToString());
-                }
+                    var doctor = await _timeSlotService.GetTimeSlotByIdAsync(id);
 
-                await _timeSlotService.DeleteTimeSlotAsync(id);
+                    if (doctor == null)
+                    {
+                        _response.StatusCode = HttpStatusCode.NotFound;
+                        _response.DisplayMessage = CommonMessages.RecordNotFound;
+                        _response.AddError(ModelState.ToString());
+                    }
+                    else
+                    {
+                        await _timeSlotService.DeleteTimeSlotAsync(id);
 
-                _response.StatusCode = HttpStatusCode.NoContent;
-                _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
-                _response.IsSuccess = true;
+                        _response.StatusCode = HttpStatusCode.NoContent;
+                        _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+                        _response.IsSuccess = true;
+                    }                    
+                }                    
 
             }
             catch(Exception)

@@ -35,14 +35,18 @@ namespace AppointmentBooking.Web.Controllers
                     _response.AddError(ModelState.ToString());
                 }
 
-                var createdAppointment = await _appointmentService.CreateAppointmentAsync(Appointment);
+                else
+                {
+                    var createdAppointment = await _appointmentService.CreateAppointmentAsync(Appointment);
 
-                _response.StatusCode = HttpStatusCode.Created;
-                _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
-                _response.IsSuccess = true;
-                _response.Result = createdAppointment;
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
+                    _response.IsSuccess = true;
+                    _response.Result = createdAppointment;
+                }
+                
             }
-            catch   (Exception)
+            catch (Exception)
             {
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.DisplayMessage = CommonMessages.CreateOperationFailed;
@@ -54,7 +58,7 @@ namespace AppointmentBooking.Web.Controllers
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
-        public async Task<ActionResult> GetAppointments()
+        public async Task<ActionResult<APIResponse>> GetAppointments()
         {
             try
             {
@@ -76,7 +80,7 @@ namespace AppointmentBooking.Web.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
         [Route("Filter")]
-        public async Task<ActionResult> GetAppointmentsByFilter(int? doctorId, int? patientId)
+        public async Task<ActionResult<APIResponse>> GetAppointmentsByFilter(int? doctorId, int? patientId)
         {
             try
             {
@@ -91,62 +95,117 @@ namespace AppointmentBooking.Web.Controllers
                 _response.AddError(CommonMessages.SystemError);
             }
 
-            return StatusCode((int)_response.StatusCode, _response);
+            return Ok(_response);
 
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]      
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult> GetAppointmentById(int id)
+        public async Task<ActionResult<APIResponse>> GetAppointmentById(int id)
         {
-            var Appointment = await _appointmentService.GetAppointmentByIdAsync(id);
-
-            if (Appointment == null)
+            try
             {
+                var Appointment = await _appointmentService.GetAppointmentByIdAsync(id);
 
-                return NotFound(new { Message = $"Record not found for Id - {id}" });
+                if (Appointment == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.DisplayMessage = CommonMessages.RecordNotFound;                   
+                }
+                else
+                {
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.IsSuccess = true;
+                    _response.Result = Appointment;
+                }                
+
             }
+            catch(Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.AddError(CommonMessages.SystemError);
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+            
 
-            return Ok(Appointment);
+            return Ok(_response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPatch("{id}")]
-        public async Task<ActionResult> UpdateAppointment(int id, UpdateAppointmentDto doctor)
+        public async Task<ActionResult<APIResponse>> UpdateAppointment(int id, UpdateAppointmentDto doctor)
         {
-
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+                    _response.AddError(ModelState.ToString());
+                }
+                else
+                {
+                    await _appointmentService.UpdateAppointmentAsync(id, doctor);
+
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
+                    _response.IsSuccess = true;
+                }
             }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+                _response.AddError(CommonMessages.SystemError);
+            }            
 
-            await _appointmentService.UpdateAppointmentAsync(id, doctor);
-
-            return NoContent();
+            return Ok(_response);
 
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpDelete]
-        public async Task<ActionResult> DeleteAppointment(int id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<APIResponse>> DeleteAppointment(int id)
         {
-
-            if (id == 0)
+            try
             {
-                return BadRequest(ModelState);
+                if (id == 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+                    _response.AddError(ModelState.ToString());
+                }
+
+                else
+                {
+                    var doctor = await _appointmentService.GetAppointmentByIdAsync(id);
+
+                    if (doctor == null)
+                    {
+                        _response.StatusCode = HttpStatusCode.NotFound;
+                        _response.DisplayMessage = CommonMessages.RecordNotFound;
+                        _response.AddError(ModelState.ToString());
+                    }
+                    else
+                    {
+                        await _appointmentService.DeleteAppointmentAsync(id);
+
+                        _response.StatusCode = HttpStatusCode.NoContent;
+                        _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+                        _response.IsSuccess = true;
+                    }                    
+                }                
+
             }
-
-            var doctor = await _appointmentService.GetAppointmentByIdAsync(id);
-
-            if (doctor == null)
+            catch (Exception)
             {
-                return NotFound(new { Message = $"Record not found for Id - {id}" });
-            }
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+                _response.AddError(CommonMessages.SystemError);
+            }            
 
-            await _appointmentService.DeleteAppointmentAsync(id);
-
-            return NoContent();
+            return Ok(_response);
 
         }
 

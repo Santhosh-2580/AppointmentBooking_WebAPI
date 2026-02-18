@@ -80,12 +80,15 @@ namespace AppointmentBooking.Application.Services
             if (dto.MaxPatients < existingSlot.BookedCount)
                 throw new InvalidOperationException("MaxPatients cannot be less than BookedCount");
 
+            if (existingSlot.DoctorId != dto.DoctorId && existingSlot.BookedCount > 0)
+                throw new InvalidOperationException("Cannot change DoctorId for a slot that already has bookings");
+
             // Map updated fields
-            existingSlot.DoctorId = dto.DoctorId;
-            existingSlot.SlotDate = dto.SlotDate;
-            existingSlot.StartTime = dto.StartTime;
-            existingSlot.EndTime = dto.EndTime;
-            existingSlot.MaxPatients = dto.MaxPatients;
+            if (dto.DoctorId != 0) existingSlot.DoctorId = dto.DoctorId;
+            if (dto.SlotDate != default) existingSlot.SlotDate = dto.SlotDate;
+            if (dto.StartTime != default) existingSlot.StartTime = dto.StartTime;
+            if (dto.EndTime != default) existingSlot.EndTime = dto.EndTime;
+            if (dto.MaxPatients != 0) existingSlot.MaxPatients = dto.MaxPatients;
 
             await _timeSlotRepository.UpdateAsync(existingSlot);
         }

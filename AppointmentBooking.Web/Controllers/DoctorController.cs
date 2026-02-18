@@ -38,12 +38,15 @@ namespace AppointmentBooking.Web.Controllers
                     _response.AddError(ModelState.ToString());                    
                 }
 
-                var createdDoctor = await _doctorService.CreateDoctorAsync(doctor);
+                else
+                {
+                    var createdDoctor = await _doctorService.CreateDoctorAsync(doctor);
 
-                _response.StatusCode = HttpStatusCode.Created;
-                _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
-                _response.IsSuccess = true;
-                _response.Result = createdDoctor;
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
+                    _response.IsSuccess = true;
+                    _response.Result = createdDoctor;
+                }                
 
             }
             catch (Exception)
@@ -53,7 +56,7 @@ namespace AppointmentBooking.Web.Controllers
                 _response.AddError(CommonMessages.SystemError);
             }
 
-            return StatusCode((int)_response.StatusCode, _response);
+            return Ok(_response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -76,7 +79,7 @@ namespace AppointmentBooking.Web.Controllers
             }
 
 
-            return StatusCode((int)_response.StatusCode, _response);
+            return Ok(_response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -93,9 +96,12 @@ namespace AppointmentBooking.Web.Controllers
                     _response.StatusCode = HttpStatusCode.NotFound;
                     _response.DisplayMessage = CommonMessages.RecordNotFound;
                 }
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.IsSuccess = true;
-                _response.Result = doctor;
+                else
+                {
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.IsSuccess = true;
+                    _response.Result = doctor;
+                }               
 
             }
             catch (Exception)
@@ -103,7 +109,7 @@ namespace AppointmentBooking.Web.Controllers
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.AddError(CommonMessages.SystemError);
             }
-            return StatusCode((int)_response.StatusCode, _response);
+            return Ok(_response);
 
         }
 
@@ -120,12 +126,14 @@ namespace AppointmentBooking.Web.Controllers
                     _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
                     _response.AddError(ModelState.ToString());
                 }
+                else
+                {
+                    await _doctorService.UpdateDoctorAsync(id, doctor);
 
-                await _doctorService.UpdateDoctorAsync(id, doctor);
-
-                _response.StatusCode = HttpStatusCode.Created;
-                _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
-                _response.IsSuccess = true;
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
+                    _response.IsSuccess = true;
+                }                
                 
             }
             catch (Exception)
@@ -135,14 +143,13 @@ namespace AppointmentBooking.Web.Controllers
                 _response.AddError(CommonMessages.SystemError);
             }
 
-
-            return StatusCode((int)_response.StatusCode, _response);
+            return Ok(_response);
 
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpDelete]
-        public async Task<ActionResult> DeleteDoctor(int id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<APIResponse>> DeleteDoctor(int id)
         {
             try
             {
@@ -152,21 +159,26 @@ namespace AppointmentBooking.Web.Controllers
                     _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
                     _response.AddError(ModelState.ToString());
                 }
-
-                var doctor = await _doctorService.GetDoctorByIdAsync(id);
-
-                if (doctor == null)
+                else
                 {
-                    _response.StatusCode = HttpStatusCode.NotFound;
-                    _response.DisplayMessage = CommonMessages.RecordNotFound;
-                    _response.AddError(ModelState.ToString());
-                }
+                    var doctor = await _doctorService.GetDoctorByIdAsync(id);
 
-                await _doctorService.DeleteDoctorAsync(id);
+                    if (doctor == null)
+                    {
+                        _response.StatusCode = HttpStatusCode.NotFound;
+                        _response.DisplayMessage = CommonMessages.RecordNotFound;
+                        _response.AddError(ModelState.ToString());
+                    }
+                    else
+                    {
+                        await _doctorService.DeleteDoctorAsync(id);
 
-                _response.StatusCode = HttpStatusCode.NoContent;
-                _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
-                _response.IsSuccess = true;
+                        _response.StatusCode = HttpStatusCode.NoContent;
+                        _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+                        _response.IsSuccess = true;
+                    }                    
+
+                }                   
 
             }
             catch (Exception)
@@ -176,7 +188,7 @@ namespace AppointmentBooking.Web.Controllers
                 _response.AddError(CommonMessages.SystemError);
             }
 
-            return StatusCode((int)_response.StatusCode, _response);
+            return Ok(_response);
 
         }
     }
