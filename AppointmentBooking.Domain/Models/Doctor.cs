@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 namespace AppointmentBooking.Domain.Models
 {
     public class Doctor : BaseModel
-    {       
+    {
+        public string UserId { get; set; }
 
         [Required]
         public string DoctorName { get; set; }
@@ -21,13 +22,7 @@ namespace AppointmentBooking.Domain.Models
 
         [Required]
         public int ExperienceYears { get; set; }
-
-        public string Email { get; set; }
-
-        [Required]
-        [StringLength(10, MinimumLength = 10)]
-        [RegularExpression("^[6-9][0-9]{9}$", ErrorMessage = "Invalid mobile number")]
-        public string MobileNumber { get; set; }
+        
         public bool IsActive { get; set; } = true;
     }
 }

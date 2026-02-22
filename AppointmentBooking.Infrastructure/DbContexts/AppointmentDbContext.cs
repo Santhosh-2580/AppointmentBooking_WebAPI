@@ -1,4 +1,7 @@
-﻿using AppointmentBooking.Domain.Models;
+﻿using AppointmentBooking.Application.Common;
+using AppointmentBooking.Domain.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AppointmentBooking.Infrastructure.DbContexts
 {
-    public class AppointmentDbContext : DbContext
+    public class AppointmentDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppointmentDbContext(DbContextOptions<AppointmentDbContext> options) : base(options)
         {
@@ -19,7 +22,9 @@ namespace AppointmentBooking.Infrastructure.DbContexts
         public DbSet<Appointment> Appointments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {        
+        {
+            //REQUIRED FOR IDENTITY
+            base.OnModelCreating(modelBuilder);
 
             // Appointment → Patient
             modelBuilder.Entity<Appointment>()
@@ -42,8 +47,11 @@ namespace AppointmentBooking.Infrastructure.DbContexts
                 v => DateOnly.FromDateTime(v))
                 .HasColumnType("date");
 
-
-
+            modelBuilder.Entity<Doctor>()
+        .       HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<Doctor>(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

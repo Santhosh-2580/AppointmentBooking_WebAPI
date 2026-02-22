@@ -4,6 +4,7 @@ using AppointmentBooking.Application.DTO.Doctor;
 using AppointmentBooking.Application.Services.Interface;
 using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -25,7 +26,8 @@ namespace AppointmentBooking.Web.Controllers
             _response = new APIResponse();
         }
 
-        [ProducesResponseType(StatusCodes.Status200OK)]       
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status201Created)]       
         [HttpPost]
         public async Task<ActionResult<APIResponse>> AddDoctor([FromBody] CreateDoctorDto doctor)
         {

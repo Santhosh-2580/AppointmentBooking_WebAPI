@@ -4,6 +4,7 @@ using AppointmentBooking.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppointmentBooking.Infrastructure.Migrations
 {
     [DbContext(typeof(AppointmentDbContext))]
-    partial class AppointmentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260219104357_ApplicationUSer")]
+    partial class ApplicationUSer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,13 +44,7 @@ namespace AppointmentBooking.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FullName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -140,11 +137,19 @@ namespace AppointmentBooking.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ExperienceYears")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<string>("MobileNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("RegistrationNumber")
                         .HasColumnType("int");
@@ -153,14 +158,7 @@ namespace AppointmentBooking.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Doctors");
                 });
@@ -385,14 +383,6 @@ namespace AppointmentBooking.Infrastructure.Migrations
                     b.Navigation("Patient");
 
                     b.Navigation("TimeSlot");
-                });
-
-            modelBuilder.Entity("AppointmentBooking.Domain.Models.Doctor", b =>
-                {
-                    b.HasOne("AppointmentBooking.Application.Common.ApplicationUser", null)
-                        .WithOne()
-                        .HasForeignKey("AppointmentBooking.Domain.Models.Doctor", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("AppointmentBooking.Domain.Models.TimeSlot", b =>

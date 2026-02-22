@@ -26,5 +26,8 @@ namespace AppointmentBooking.Application.DTO.Doctor
         [StringLength(10, MinimumLength = 10)]
         [RegularExpression("^[6-9][0-9]{9}$", ErrorMessage = "Invalid mobile number")]
         public string MobileNumber { get; set; }
+
+        [Required]
+        public string Password { get; set; }
     }
 }
