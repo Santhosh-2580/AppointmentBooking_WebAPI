@@ -1,10 +1,15 @@
 ﻿using AppointmentBooking.Application.Common;
 using AppointmentBooking.Application.InputModels;
 using AppointmentBooking.Application.Services.Interface;
+using AppointmentBooking.Application.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,12 +19,14 @@ namespace AppointmentBooking.Application.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IConfiguration _config;
         private ApplicationUser ApplicationUser;
 
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _config = config;
             ApplicationUser = new();
 
         }       
@@ -57,7 +64,14 @@ namespace AppointmentBooking.Application.Services
 
             if (result.Succeeded)
             {
-                return true;
+                var token = await GenerateToken();
+
+                LoginResponse loginResponse = new LoginResponse
+                {
+                    Token = token,
+                    UserId = ApplicationUser.Id                   
+                };
+                return loginResponse;
             }
             else
             {
@@ -81,6 +95,35 @@ namespace AppointmentBooking.Application.Services
                 {
                     return "Login failed. Please try again.";
                 }
+            }
+        }
+
+        public async Task<string> GenerateToken()
+        {
+            try
+            {
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]));
+                var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                var roles = await _userManager.GetRolesAsync(ApplicationUser);
+                var rolesClaims = roles.Select(r => new Claim(ClaimTypes.Role, r)).ToList();
+                List<Claim> claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Email, ApplicationUser.Email)
+        }.Union(rolesClaims).ToList();
+
+                var token = new JwtSecurityToken(
+                    issuer: _config["JwtSettings:Issuer"],
+                    audience: _config["JwtSettings:Audience"],
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireMinutes"])),
+                    signingCredentials: signingCredentials
+                );
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Token generation failed: {ex.Message}");
             }
         }
     }
