@@ -30,14 +30,14 @@ namespace AppointmentBooking.Application.Common
             CreateMap<Patient, CreatePatientDto>().ReverseMap();
             CreateMap<Patient, UpdatePatientDto>().ReverseMap();
             CreateMap<Patient, PatientDto>().ReverseMap();
-
+                
             CreateMap<Appointment, CreateAppointmentDto>().ReverseMap();
             CreateMap<Appointment, UpdateAppointmentDto>().ReverseMap();
             CreateMap<Appointment, AppointmentsDto>()
                 .ForMember(x=> x.DoctorId, opt => opt.MapFrom(src => src.TimeSlot.DoctorId))
                 .ForMember(x => x.DoctorName, opt => opt.MapFrom(src => src.TimeSlot.Doctor.DoctorName))
                 .ForMember(x => x.Specialty, opt => opt.MapFrom(src => src.TimeSlot.Doctor.Specialty))
-                .ForMember(x => x.PatientName, opt => opt.MapFrom(src => src.Patient.PatientName))
+                //.ForMember(x => x.PatientName, opt => opt.MapFrom(src => src.Patient.PatientName))
                 .ForMember(x => x.MobileNumber, opt => opt.MapFrom(src => src.Patient.MobileNumber))
                 .ForMember(x=> x.Age, opt => opt.MapFrom(src => AgeHelper.CalculateAge(src.Patient.DateOfBirth)))
                 .ForMember(x => x.SlotDate, opt => opt.MapFrom(src => src.TimeSlot.SlotDate))

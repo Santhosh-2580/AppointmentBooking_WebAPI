@@ -22,11 +22,19 @@ namespace AppointmentBooking.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<CreatePatientDto> CreatePatientAsync(CreatePatientDto patientDto)
+        public async Task<PatientDto> CreatePatientAsync(CreatePatientDto patientDto, string userId)
         {
+            var existingPatient = await _patientRepository.GetByUserIdAsync(userId);
+            if (existingPatient != null)
+            {
+                throw new Exception("Patient profile with the same user ID already exists");
+            }
             var patientEntity = _mapper.Map<Patient>(patientDto);
+
+            patientEntity.UserId = userId;
+
             var createdPatient = await _patientRepository.CreateAsync(patientEntity);
-            return _mapper.Map<CreatePatientDto>(createdPatient);
+            return _mapper.Map<PatientDto>(createdPatient);
         }
 
         public async Task DeletePatientAsync(int id)
@@ -54,12 +62,12 @@ namespace AppointmentBooking.Application.Services
             {
                 throw new Exception("Patient not found");
             }
-            if(updatePatientDto.PatientName != null)            
-                patient.PatientName = updatePatientDto.PatientName;
+            //if(updatePatientDto.PatientName != null)            
+            //    patient.PatientName = updatePatientDto.PatientName;
             if(updatePatientDto.MobileNumber != null)
                 patient.MobileNumber = updatePatientDto.MobileNumber;
-            if(updatePatientDto.Email != null)
-                patient.Email = updatePatientDto.Email;
+            //if(updatePatientDto.Email != null)
+            //    patient.Email = updatePatientDto.Email;
             if(updatePatientDto.DateOfBirth != default)
                 patient.DateOfBirth = updatePatientDto.DateOfBirth;
             if (updatePatientDto.Gender != default)

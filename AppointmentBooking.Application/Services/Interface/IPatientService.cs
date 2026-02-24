@@ -11,7 +11,7 @@ namespace AppointmentBooking.Application.Services.Interface
     {
         Task<PatientDto> GetPatientByIdAsync(int id);
         Task<IEnumerable<PatientDto>> GetAllPatientsAsync();
-        Task<CreatePatientDto> CreatePatientAsync(CreatePatientDto patientDto);
+        Task<PatientDto> CreatePatientAsync(CreatePatientDto patientDto, string userId);
         Task UpdatePatientAsync(int id, UpdatePatientDto updatePatientDto);
         Task DeletePatientAsync(int id);
     }

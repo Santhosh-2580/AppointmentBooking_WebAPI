@@ -11,15 +11,12 @@ namespace AppointmentBooking.Domain.Models
 {
     public class Patient : BaseModel
     {
-        [Required]
-        public string PatientName { get; set; }
+        public string UserId { get; set; }
+       
         [Required]
         [StringLength(10, MinimumLength = 10)]
         [RegularExpression("^[6-9][0-9]{9}$", ErrorMessage = "Invalid mobile number")]
-        public string MobileNumber { get; set; }
-        
-        [EmailAddress]        
-        public string Email { get; set; }
+        public string MobileNumber { get; set; }       
 
         [Required]
         public DateOnly DateOfBirth { get; set; }

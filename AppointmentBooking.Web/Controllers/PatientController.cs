@@ -4,9 +4,11 @@ using AppointmentBooking.Application.DTO.Patient;
 using AppointmentBooking.Application.Services.Interface;
 using AppointmentBooking.Domain.Models;
 using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Security.Claims;
 
 namespace AppointmentBooking.Web.Controllers
 {
@@ -23,6 +25,7 @@ namespace AppointmentBooking.Web.Controllers
                 _response = new APIResponse();
         }
 
+        [Authorize(Roles ="Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPost]
         public async Task<ActionResult<APIResponse>> AddPatient([FromBody] CreatePatientDto patient)
@@ -37,7 +40,9 @@ namespace AppointmentBooking.Web.Controllers
                 }
                 else
                 {
-                    var createdPatient = await _patientService.CreatePatientAsync(patient);
+                    var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
+
+                    var createdPatient = await _patientService.CreatePatientAsync(patient,userId);
 
                     _response.StatusCode = HttpStatusCode.Created;
                     _response.DisplayMessage = CommonMessages.CreateOperationSuccess;

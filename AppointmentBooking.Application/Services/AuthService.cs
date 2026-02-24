@@ -102,23 +102,61 @@ namespace AppointmentBooking.Application.Services
         {
             try
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]));
-                var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-                var roles = await _userManager.GetRolesAsync(ApplicationUser);
-                var rolesClaims = roles.Select(r => new Claim(ClaimTypes.Role, r)).ToList();
-                List<Claim> claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Email, ApplicationUser.Email)
-        }.Union(rolesClaims).ToList();
-
-                var token = new JwtSecurityToken(
-                    issuer: _config["JwtSettings:Issuer"],
-                    audience: _config["JwtSettings:Audience"],
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireMinutes"])),
-                    signingCredentials: signingCredentials
+                // 1️. Create Security Key
+                // This key is used to SIGN the token.
+                // Without this key, token cannot be validated.
+                var securityKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(_config["JwtSettings:Key"])
                 );
 
+                // 2️. Create Signing Credentials
+                // Defines which algorithm is used to sign the token.
+                // HmacSha256 = industry standard symmetric encryption.
+                var signingCredentials = new SigningCredentials(
+                    securityKey, SecurityAlgorithms.HmacSha256
+                );
+
+                // 3️. Get Roles of the User from ASP.NET Identity
+                // Example: Patient, Admin, Doctor
+                var roles = await _userManager.GetRolesAsync(ApplicationUser);
+
+                // 4️. Convert Roles into Claims
+                // Role claims help in [Authorize(Roles = "Patient")] checks.
+                var roleClaims = roles
+                    .Select(role => new Claim(ClaimTypes.Role, role))
+                    .ToList();
+
+                // 5️. Create Basic Claims for the Token
+                // Claims are pieces of information stored inside JWT.
+                var claims = new List<Claim>
+        {
+            // 🔥 VERY IMPORTANT
+            // This stores the UserId (Primary Key from AspNetUsers table).
+            // Later we retrieve this using:
+            // User.FindFirstValue(ClaimTypes.NameIdentifier)
+            new Claim(ClaimTypes.NameIdentifier, ApplicationUser.Id),
+
+            // Stores user's email in token
+            new Claim(ClaimTypes.Email, ApplicationUser.Email),
+
+            // Stores username
+            new Claim(ClaimTypes.Name, ApplicationUser.UserName)
+        };
+
+                // Add Role claims to main claims list
+                claims.AddRange(roleClaims);
+
+                // 6️. Create the JWT Token
+                var token = new JwtSecurityToken(
+                    issuer: _config["JwtSettings:Issuer"],      // Who created the token
+                    audience: _config["JwtSettings:Audience"],  // Who can use the token
+                    claims: claims,                             // User information stored
+                    expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireMinutes"])), // Token expiry time
+                    signingCredentials: signingCredentials      // Signature
+                );
+
+                // 7️. Convert Token Object into String
+                // This string is sent to frontend.
                 return new JwtSecurityTokenHandler().WriteToken(token);
             }
             catch (Exception ex)

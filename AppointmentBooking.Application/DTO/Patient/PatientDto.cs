@@ -17,8 +17,7 @@ namespace AppointmentBooking.Application.DTO.Patient
         public string Email { get; set; }  
         public DateOnly DateOfBirth { get; set; }
         public Gender Gender { get; set; }
-        public int Age => AgeHelper.CalculateAge(DateOfBirth);
-        
+        public int Age => AgeHelper.CalculateAge(DateOfBirth);        
 
     }
 }

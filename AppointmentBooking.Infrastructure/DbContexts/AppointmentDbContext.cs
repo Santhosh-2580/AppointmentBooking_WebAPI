@@ -52,6 +52,12 @@ namespace AppointmentBooking.Infrastructure.DbContexts
                 .WithOne()
                 .HasForeignKey<Doctor>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+               modelBuilder.Entity<Patient>()
+                .HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<Patient>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -9,6 +9,8 @@ namespace AppointmentBooking.Domain.Corntracts
 {
     public interface IPatientRepository : IGenericRepository<Patient>
     {
-            Task UpdateAsync(Patient patient);
+         Task UpdateAsync(Patient patient);
+
+        Task<Patient> GetByUserIdAsync(string userId);
     }
 }
