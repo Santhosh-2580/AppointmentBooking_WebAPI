@@ -15,12 +15,12 @@ namespace AppointmentBooking.Application
        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddAutoMapper(typeof(MappingProfile));
-            services.AddScoped<IAuthService, AuthService>();
+            //services.AddScoped<IAuthService, AuthService>();
 
-            services.AddScoped<IDoctorService, DoctorService>();
-            services.AddScoped<ITimeSlotService, TimeSlotService>();
-            services.AddScoped<IPatientService, PatientService>();
-            services.AddScoped<IAppointmentService, AppointmentService>();
+            //services.AddScoped<IDoctorService, DoctorService>();
+            //services.AddScoped<ITimeSlotService, TimeSlotService>();
+            //services.AddScoped<IPatientService, PatientService>();
+            //services.AddScoped<IAppointmentService, AppointmentService>();
             return services;
         }
     }

@@ -1,4 +1,5 @@
-﻿using AppointmentBooking.Domain.Corntracts;
+﻿#nullable enable
+using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Domain.Models;
 using AppointmentBooking.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;

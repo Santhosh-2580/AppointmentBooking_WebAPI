@@ -6,6 +6,15 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Common\ApplicationUser.cs" />
+    <Compile Remove="Services\AppointmentService.cs" />
+    <Compile Remove="Services\AuthService.cs" />
+    <Compile Remove="Services\DoctorService.cs" />
+    <Compile Remove="Services\PatientService.cs" />
+    <Compile Remove="Services\TimeSlotService.cs" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>

@@ -1,8 +1,8 @@
 using AppointmentBooking.Application;
-using AppointmentBooking.Application.Common;
 using AppointmentBooking.Infrastructure;
 using AppointmentBooking.Infrastructure.Common;
 using AppointmentBooking.Infrastructure.DbContexts;
+using AppointmentBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

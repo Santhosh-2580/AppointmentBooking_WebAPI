@@ -1,5 +1,6 @@
 ﻿using AppointmentBooking.Application.Common;
 using AppointmentBooking.Domain.Models;
+using AppointmentBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
