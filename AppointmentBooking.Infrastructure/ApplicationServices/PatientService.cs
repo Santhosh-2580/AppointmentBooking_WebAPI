@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,7 +43,8 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             var user = await _userManager.FindByIdAsync(userId);
 
             return new PatientDto
-            {               
+            {   
+                Id = createdPatient.Id,
                 MobileNumber = createdPatient.MobileNumber,
                 DateOfBirth = createdPatient.DateOfBirth,
                 Gender = createdPatient.Gender,
@@ -67,8 +69,30 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
 
         public async Task<PatientDto> GetPatientByIdAsync(int id)
         {
-            var patient = await _patientRepository.GetByIdAsync(x => x.Id == id);
-            return _mapper.Map<PatientDto>(patient);
+            throw new NotImplementedException();
+        }
+
+        public async Task<PatientDto> GetPatientProfileAsync(string userId)
+        {
+            var getPatient = await _patientRepository.GetByUserIdAsync(userId);
+            if (getPatient == null)
+            {
+                throw new Exception("Patient not found");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            return new PatientDto
+            {
+                Id = getPatient.Id,
+                PatientName = user.FirstName + " " + user.LastName,
+                MobileNumber = getPatient.MobileNumber,
+                DateOfBirth = getPatient.DateOfBirth,
+                Gender = getPatient.Gender,
+                Email = user.Email,    
+
+            };
+          
         }
 
         public async Task UpdatePatientAsync(int id, UpdatePatientDto updatePatientDto)

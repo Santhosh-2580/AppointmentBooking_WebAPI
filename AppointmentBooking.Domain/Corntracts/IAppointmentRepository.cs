@@ -13,6 +13,8 @@ namespace AppointmentBooking.Domain.Corntracts
         Task UpdateAsync(Appointment appointment);
         Task<IEnumerable<Appointment>> GetAppointmentDetailsAsync();
         Task<bool> ExistsAsync(Expression<Func<Appointment, bool>> predicate);
+        Task<IEnumerable<Appointment>> GetAppointmentsByDoctorIdAsync(int doctorId);
+        Task<IEnumerable<Appointment>> GetAppointmentsByPatientIdAsync(int patientId);
 
     }
 }

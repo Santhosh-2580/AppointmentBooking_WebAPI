@@ -1,6 +1,7 @@
 ﻿using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Domain.Models;
 using AppointmentBooking.Infrastructure.DbContexts;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,11 @@ namespace AppointmentBooking.Infrastructure.Repositories
         public DoctorRepository(AppointmentDbContext dbContext) : base(dbContext)
         {
 
+        }
+
+        public async Task<Doctor> GetByUserIdAsync(string userId)
+        {
+            return await _dbContext.Doctors.FirstOrDefaultAsync(p => p.UserId == userId);
         }
 
         public async Task UpdateAsync(Doctor doctor)

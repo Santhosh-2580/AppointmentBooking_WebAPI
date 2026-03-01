@@ -25,6 +25,14 @@ namespace AppointmentBooking.Web.Controllers
                 _response = new APIResponse();
         }
 
+        /// <summary>
+        /// Creates a new patient profile linked to the currently logged-in user. Only users with the Patient role can create a profile. The method validates the input and returns a success or error response accordingly.
+        /// </summary>
+        /// <remarks>
+        /// ⚠ Please enter all details carefully. Once submitted, this information cannot be modified. Contact Admin if you need to update your profile information after submission.
+        /// </remarks>
+        /// <param name="patient"></param>
+        /// <returns></returns>
         [Authorize(Roles ="Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPost]
@@ -62,34 +70,41 @@ namespace AppointmentBooking.Web.Controllers
             return Ok(_response);
         }
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpGet]
-        public async Task<ActionResult<APIResponse>> GetPatients()
-        {
-            try
-            {
-                var patients = await _patientService.GetAllPatientsAsync();
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.IsSuccess = true;
-                _response.Result = patients;
-            }
-            catch(Exception)
-            {
-                _response.StatusCode = HttpStatusCode.InternalServerError;               
-                _response.AddError(CommonMessages.SystemError);
-            }            
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpGet]
+        //public async Task<ActionResult<APIResponse>> GetPatients()
+        //{
+        //    try
+        //    {
+        //        var patients = await _patientService.GetAllPatientsAsync();
+        //        _response.StatusCode = HttpStatusCode.OK;
+        //        _response.IsSuccess = true;
+        //        _response.Result = patients;
+        //    }
+        //    catch(Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;               
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }            
 
-            return Ok(_response);
-        }
+        //    return Ok(_response);
+        //}
 
+        /// <summary>
+        /// Retrieves the profile information for the currently authenticated patient.
+        /// </summary>
+        /// <returns>An ActionResult containing an APIResponse with the patient's profile data if found; otherwise, an error
+        /// message.</returns>
+        [Authorize(Roles = "Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]        
-        [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult<APIResponse>> GetPatientById(int id)
+        [HttpGet("Patient-Profile")]       
+        public async Task<ActionResult<APIResponse>> GetPatientProfile()
         {
             try
             {
-                var patient = await _patientService.GetPatientByIdAsync(id);
+                var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
+
+                var patient = await _patientService.GetPatientProfileAsync(userId);
 
                 if (patient == null)
                 {
@@ -113,83 +128,84 @@ namespace AppointmentBooking.Web.Controllers
             return Ok(_response);
         }
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpPatch("{id}")]
-        public async Task<ActionResult> UpdatePatient(int id, UpdatePatientDto patient)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
-                    _response.AddError(ModelState.ToString());
-                }
-                else
-                {
-                    await _patientService.UpdatePatientAsync(id, patient);
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpPatch("{id}")]
+        //public async Task<ActionResult> UpdatePatient(int id, UpdatePatientDto patient)
+        //{
+        //    try
+        //    {
+        //        if (!ModelState.IsValid)
+        //        {
+        //            _response.StatusCode = HttpStatusCode.BadRequest;
+        //            _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+        //            _response.AddError(ModelState.ToString());
+        //        }
+        //        else
+        //        {
+        //            await _patientService.UpdatePatientAsync(id, patient);
 
-                    _response.StatusCode = HttpStatusCode.Created;
-                    _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
-                    _response.IsSuccess = true;
-                }
+        //            _response.StatusCode = HttpStatusCode.Created;
+        //            _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
+        //            _response.IsSuccess = true;
+        //        }
 
                    
-            }
-            catch (Exception)
-            {
-                _response.StatusCode = HttpStatusCode.InternalServerError;
-                _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
-                _response.AddError(CommonMessages.SystemError);
-            }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;
+        //        _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }
 
-            return Ok(_response);
+        //    return Ok(_response);
 
-        }
+        //}
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeletePatient(int id)
-        {
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpDelete("{id}")]
+        //public async Task<ActionResult> DeletePatient(int id)
+        //{
 
-            try
-            {
-                if (id == 0)
-                {
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
-                    _response.AddError(ModelState.ToString());
-                }
-                else
-                {
-                    var patient = await _patientService.GetPatientByIdAsync(id);
+        //    try
+        //    {
+        //        if (id == 0)
+        //        {
+        //            _response.StatusCode = HttpStatusCode.BadRequest;
+        //            _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+        //            _response.AddError(ModelState.ToString());
+        //        }
+        //        else
+        //        {
 
-                    if (patient == null)
-                    {
-                        _response.StatusCode = HttpStatusCode.NotFound;
-                        _response.DisplayMessage = CommonMessages.RecordNotFound;
-                        _response.AddError(ModelState.ToString());
-                    }
-                    else
-                    {
-                        await _patientService.DeletePatientAsync(id);
+        //            var patient = await _patientService.GetPatientByIdAsync(id);
 
-                        _response.StatusCode = HttpStatusCode.NoContent;
-                        _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
-                        _response.IsSuccess = true;
-                    }                       
-                }
-            }
-            catch (Exception)
-            {
-                _response.StatusCode = HttpStatusCode.InternalServerError;
-                _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
-                _response.AddError(CommonMessages.SystemError);
-            }            
+        //            if (patient == null)
+        //            {
+        //                _response.StatusCode = HttpStatusCode.NotFound;
+        //                _response.DisplayMessage = CommonMessages.RecordNotFound;
+        //                _response.AddError(ModelState.ToString());
+        //            }
+        //            else
+        //            {
+        //                await _patientService.DeletePatientAsync(id);
 
-            return Ok(_response);
+        //                _response.StatusCode = HttpStatusCode.NoContent;
+        //                _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+        //                _response.IsSuccess = true;
+        //            }
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;
+        //        _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }            
 
-        }
+        //    return Ok(_response);
+
+        //}
     }
 }
 

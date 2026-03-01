@@ -5,6 +5,7 @@ using AppointmentBooking.Domain.Models;
 using AppointmentBooking.Infrastructure.Identity;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,13 +63,41 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
         public async Task<IEnumerable<DoctorDto>> GetAllDoctorsAsync()
         {
             var doctors = await _doctorRepository.GetAllAsync();
-            return _mapper.Map<List<DoctorDto>>(doctors);
+
+            var doctorIds = doctors.Select(a => a.UserId).Distinct().ToList();
+
+            var users = await _userManager.Users.Where(u => doctorIds.Contains(u.Id)).ToListAsync();
+
+            return doctors.Select(doctor =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == doctor.UserId);
+                var doctorDto = _mapper.Map<DoctorDto>(doctor);
+                if (user != null)
+                {
+                    doctorDto.Email = user.Email;
+                    doctorDto.MobileNumber = user.PhoneNumber;
+                }
+                return doctorDto;
+            }).ToList();
+          
         }
 
         public async Task<DoctorDto> GetDoctorByIdAsync(int id)
         {
             var doctor = await _doctorRepository.GetByIdAsync(x => x.Id == id);
-            return _mapper.Map<DoctorDto>(doctor);
+
+            var user = await _userManager.FindByIdAsync(doctor.UserId);
+            
+            return doctor == null ? null : new DoctorDto
+            {
+                Id = doctor.Id,
+                DoctorName = doctor.DoctorName,
+                Specialty = doctor.Specialty,
+                RegistrationNumber = doctor.RegistrationNumber,
+                ExperienceYears = doctor.ExperienceYears,
+                Email = user?.Email,
+                MobileNumber = user?.PhoneNumber
+            };           
         }
 
         public async Task UpdateDoctorAsync(int id, UpdateDoctorDto dto)

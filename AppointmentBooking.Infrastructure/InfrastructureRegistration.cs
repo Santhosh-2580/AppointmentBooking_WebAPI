@@ -2,6 +2,7 @@
 using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Infrastructure.ApplicationServices;
 using AppointmentBooking.Infrastructure.Authentication;
+using AppointmentBooking.Infrastructure.Persistence;
 using AppointmentBooking.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -17,6 +18,7 @@ namespace AppointmentBooking.Infrastructure
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             // Register Infrastructure services here
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IDoctorRepository , DoctorRepository>();      

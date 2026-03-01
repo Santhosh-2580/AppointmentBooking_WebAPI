@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace AppointmentBooking.Domain.Models
 {
     public class Appointment : BaseModel
-    {               
+    {       
         public int TimeSlotId { get; set; } // FK
         public TimeSlot TimeSlot { get; set; }
         public int PatientId { get; set; }

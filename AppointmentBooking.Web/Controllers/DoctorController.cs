@@ -61,8 +61,13 @@ namespace AppointmentBooking.Web.Controllers
             return Ok(_response);
         }
 
+        /// <summary>
+        /// view all doctors. This endpoint is accessible to both admin and regular users.
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpGet]
+        [HttpGet("View-all-doctors")]
         public async Task<ActionResult<APIResponse>> GetDoctors()
         {
             try
@@ -75,7 +80,7 @@ namespace AppointmentBooking.Web.Controllers
                 _response.Result = doctors;
             }
             catch (Exception)
-            { 
+            {
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.AddError(CommonMessages.SystemError);
             }
@@ -84,12 +89,17 @@ namespace AppointmentBooking.Web.Controllers
             return Ok(_response);
         }
 
+        /// <summary>
+        /// View doctor details by id. This endpoint is accessible to both admin and regular users.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<APIResponse>> GetDoctorById(int id)
         {
-            try 
+            try
             {
                 var doctor = await _doctorService.GetDoctorByIdAsync(id);
 
@@ -103,7 +113,7 @@ namespace AppointmentBooking.Web.Controllers
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.IsSuccess = true;
                     _response.Result = doctor;
-                }               
+                }
 
             }
             catch (Exception)
@@ -115,83 +125,90 @@ namespace AppointmentBooking.Web.Controllers
 
         }
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpPatch("{id}")]
-        public async Task<ActionResult<APIResponse>> UpdateDoctor(int id, UpdateDoctorDto doctor)
-        {
+        /// <summary>
+        /// Update doctor details. This endpoint is accessible to both admin and doctors, but doctors can only update their own details, while admins can update any doctor's details.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="doctor"></param>
+        /// <returns></returns>
+        //[Authorize(Roles = "Doctor,Admin")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpPatch("{id}")]
+        //public async Task<ActionResult<APIResponse>> UpdateDoctor(int id, UpdateDoctorDto doctor)
+        //{
 
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
-                    _response.AddError(ModelState.ToString());
-                }
-                else
-                {
-                    await _doctorService.UpdateDoctorAsync(id, doctor);
+        //    try
+        //    {
+        //        if (!ModelState.IsValid)
+        //        {
+        //            _response.StatusCode = HttpStatusCode.BadRequest;
+        //            _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+        //            _response.AddError(ModelState.ToString());
+        //        }
+        //        else
+        //        {
+        //            await _doctorService.UpdateDoctorAsync(id, doctor);
 
-                    _response.StatusCode = HttpStatusCode.Created;
-                    _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
-                    _response.IsSuccess = true;
-                }                
+        //            _response.StatusCode = HttpStatusCode.Created;
+        //            _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
+        //            _response.IsSuccess = true;
+        //        }                
                 
-            }
-            catch (Exception)
-            {
-                _response.StatusCode = HttpStatusCode.InternalServerError;
-                _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
-                _response.AddError(CommonMessages.SystemError);
-            }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;
+        //        _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }
 
-            return Ok(_response);
+        //    return Ok(_response);
 
-        }
+        //}
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<APIResponse>> DeleteDoctor(int id)
-        {
-            try
-            {
-                if (id == 0)
-                {
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
-                    _response.AddError(ModelState.ToString());
-                }
-                else
-                {
-                    var doctor = await _doctorService.GetDoctorByIdAsync(id);
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpDelete("{id}")]
+        //public async Task<ActionResult<APIResponse>> DeleteDoctor(int id)
+        //{
+        //    try
+        //    {
+        //        if (id == 0)
+        //        {
+        //            _response.StatusCode = HttpStatusCode.BadRequest;
+        //            _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+        //            _response.AddError(ModelState.ToString());
+        //        }
+        //        else
+        //        {
+        //            var doctor = await _doctorService.GetDoctorByIdAsync(id);
 
-                    if (doctor == null)
-                    {
-                        _response.StatusCode = HttpStatusCode.NotFound;
-                        _response.DisplayMessage = CommonMessages.RecordNotFound;
-                        _response.AddError(ModelState.ToString());
-                    }
-                    else
-                    {
-                        await _doctorService.DeleteDoctorAsync(id);
+        //            if (doctor == null)
+        //            {
+        //                _response.StatusCode = HttpStatusCode.NotFound;
+        //                _response.DisplayMessage = CommonMessages.RecordNotFound;
+        //                _response.AddError(ModelState.ToString());
+        //            }
+        //            else
+        //            {
+        //                await _doctorService.DeleteDoctorAsync(id);
 
-                        _response.StatusCode = HttpStatusCode.NoContent;
-                        _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
-                        _response.IsSuccess = true;
-                    }                    
+        //                _response.StatusCode = HttpStatusCode.NoContent;
+        //                _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+        //                _response.IsSuccess = true;
+        //            }                    
 
-                }                   
+        //        }                   
 
-            }
-            catch (Exception)
-            {
-                _response.StatusCode = HttpStatusCode.InternalServerError;
-                _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
-                _response.AddError(CommonMessages.SystemError);
-            }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;
+        //        _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }
 
-            return Ok(_response);
+        //    return Ok(_response);
 
-        }
+        //}
     }
 }
