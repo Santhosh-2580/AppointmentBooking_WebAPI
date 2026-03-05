@@ -18,6 +18,13 @@ namespace AppointmentBooking.Infrastructure.Repositories
             
         }
 
+        public async Task<IEnumerable<Patient>> GetActivePatientsAsync()
+        {
+            return await _dbContext.Patients
+                           .Where(p => p.IsActive)
+                           .ToListAsync();
+        }
+
         public async Task<Patient?> GetByUserIdAsync(string userId)
         {
           return await _dbContext.Patients.FirstOrDefaultAsync(p => p.UserId == userId);            

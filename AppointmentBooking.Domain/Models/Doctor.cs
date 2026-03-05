@@ -1,4 +1,5 @@
 ﻿using AppointmentBooking.Domain.Common;
+using AppointmentBooking.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,8 +22,8 @@ namespace AppointmentBooking.Domain.Models
         public int RegistrationNumber { get; set; }
 
         [Required]
-        public int ExperienceYears { get; set; }
-        
+        public int ExperienceYears { get; set; }        
         public bool IsActive { get; set; } = true;
+        public Gender Gender { get; set; }
     }
 }

@@ -96,7 +96,8 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
                 RegistrationNumber = doctor.RegistrationNumber,
                 ExperienceYears = doctor.ExperienceYears,
                 Email = user?.Email,
-                MobileNumber = user?.PhoneNumber
+                MobileNumber = user?.PhoneNumber,
+                Gender = doctor.Gender
             };           
         }
 

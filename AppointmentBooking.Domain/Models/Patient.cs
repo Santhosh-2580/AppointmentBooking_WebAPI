@@ -23,6 +23,7 @@ namespace AppointmentBooking.Domain.Models
         public Gender Gender { get; set; }       
 
         public ICollection<Appointment> Appointments { get; set; }
+        public bool IsActive { get; set; } = true;
 
     }
 }
