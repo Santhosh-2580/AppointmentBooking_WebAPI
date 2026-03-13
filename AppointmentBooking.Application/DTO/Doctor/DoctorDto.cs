@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppointmentBooking.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,5 +16,8 @@ namespace AppointmentBooking.Application.DTO.Doctor
         public int ExperienceYears { get; set; }
         public string Email { get; set; }
         public string MobileNumber { get; set; }
+        public Gender Gender { get; set; }
+        public bool IsActive { get; set; }
+
     }
 }

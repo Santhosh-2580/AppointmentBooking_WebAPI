@@ -9,9 +9,7 @@ namespace AppointmentBooking.Application.DTO.Appointment
 {
     public class UpdateAppointmentDto
     {
-        public int Id { get; set; }
-        public int TimeSlotId { get; set; }
-        public int PatientId { get; set; }
+        public int Id { get; set; }           
         public AppointmentStatus Status { get; set; }
     }
 }

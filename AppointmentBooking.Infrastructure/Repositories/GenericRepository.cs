@@ -14,10 +14,22 @@ namespace AppointmentBooking.Infrastructure.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : BaseModel
     {
         protected readonly AppointmentDbContext _dbContext;
+        protected readonly DbSet<T> _dbSet;
 
         public GenericRepository(AppointmentDbContext dbContext)
         {
             _dbContext  = dbContext;
+            _dbSet = dbContext.Set<T>();
+        }
+
+        public async Task<int> CountAsync()
+        {
+            return await _dbSet.CountAsync();
+        }
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>> filter)
+        {
+            return await _dbSet.CountAsync(filter);
         }
 
         public async Task<T> CreateAsync(T entity)

@@ -13,6 +13,9 @@ namespace AppointmentBooking.Domain.Corntracts
         Task<T>CreateAsync(T entity);
         Task<IEnumerable<T>> GetAllAsync();
         Task<T> GetByIdAsync(Expression<Func<T, bool>> condition);
-        Task DeleteAsync(T entity);     
+        Task DeleteAsync(T entity);
+        Task<int> CountAsync();
+        Task<int> CountAsync(Expression<Func<T, bool>> filter);
+
     }
 }

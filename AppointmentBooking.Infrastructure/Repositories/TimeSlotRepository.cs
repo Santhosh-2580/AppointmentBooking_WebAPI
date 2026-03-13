@@ -29,6 +29,34 @@ namespace AppointmentBooking.Infrastructure.Repositories
             return await _dbContext.TimeSlots.Include(ts => ts.Doctor).ToListAsync();
         }
 
+        public async Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync()
+        {
+            var now = DateTime.UtcNow;
+            var today = DateOnly.FromDateTime(now);
+            var currentTime = now.TimeOfDay;
+
+            return await _dbContext.TimeSlots
+                .Include(ts => ts.Doctor)
+                .Where(ts =>                   
+                        ts.SlotDate > today ||
+
+                        (ts.SlotDate == today && ts.StartTime > currentTime)                    
+                )
+                .OrderBy(ts => ts.SlotDate)
+                .ThenBy(ts => ts.StartTime)
+                .ToListAsync();
+        }
+
+        public async Task<TimeSlot> GetTimeSlotsWithDoctorDetailsAsync(Expression<Func<TimeSlot, bool>> filter)
+        {
+            return await _dbContext.TimeSlots.Include(x => x.Doctor).FirstOrDefaultAsync(filter);
+        }
+
+        public async Task<IEnumerable<TimeSlot>> GetTimeSlotsByDoctorIdAsync(int doctorId)
+        {
+            return await _dbContext.TimeSlots.Where(ts => ts.DoctorId == doctorId).ToListAsync();
+        }
+
         public async Task UpdateAsync(TimeSlot timeSlot)
         {
             _dbContext.Update(timeSlot);

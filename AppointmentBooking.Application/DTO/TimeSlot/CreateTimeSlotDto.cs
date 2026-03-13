@@ -9,10 +9,7 @@ using System.Threading.Tasks;
 namespace AppointmentBooking.Application.DTO.TimeSlot
 {
     public class CreateTimeSlotDto
-    {
-        [Required]
-        public int DoctorId { get; set; }    
-
+    {        
         public DateOnly SlotDate { get; set; }
         
         [DefaultValue("10:00:00")]

@@ -9,18 +9,17 @@ namespace AppointmentBooking.Application.DTO.TimeSlot
 {
     public class UpdateTimeSlotDto
     {
-        public int Id { get; set; }
-        public int DoctorId { get; set; }
+        public int Id { get; set; }       
 
-        public DateOnly SlotDate { get; set; }
-
-        [DefaultValue("10:00:00")]
-        public TimeSpan StartTime { get; set; }
+        public DateOnly? SlotDate { get; set; }
 
         [DefaultValue("10:00:00")]
-        public TimeSpan EndTime { get; set; }
+        public TimeSpan? StartTime { get; set; }
 
-        public int MaxPatients { get; set; }
+        [DefaultValue("10:00:00")]
+        public TimeSpan? EndTime { get; set; }
+
+        public int? MaxPatients { get; set; }
        
     }
 }

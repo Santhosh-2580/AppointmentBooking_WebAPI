@@ -1,0 +1,213 @@
+﻿using AppointmentBooking.Application.ApplicationConstants;
+using AppointmentBooking.Application.Common;
+using AppointmentBooking.Application.DTO.Patient;
+using AppointmentBooking.Application.Services.Interface;
+using AppointmentBooking.Domain.Models;
+using Asp.Versioning;
+using Azure;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.Security.Claims;
+
+namespace AppointmentBooking.Web.Controllers.v1
+{
+    [Route("api/v{version:apiversion}/[controller]")]
+    [ApiController]
+    [ApiVersion("1.0")]
+    public class PatientController : ControllerBase
+    {
+        private readonly IPatientService _patientService;
+        protected APIResponse _response;
+
+        public PatientController(IPatientService patientService)
+        {
+            _patientService = patientService;
+                _response = new APIResponse();
+        }
+
+        /// <summary>
+        /// Creates a new patient profile linked to the currently logged-in user. Only users with the Patient role can create a profile. The method validates the input and returns a success or error response accordingly.
+        /// </summary>
+        /// <remarks>
+        /// ⚠ Please enter all details carefully. Once submitted, this information cannot be modified. Contact Admin if you need to update your profile information after submission.
+        /// </remarks>
+        /// <param name="patient"></param>
+        /// <returns></returns>
+        [Authorize(Roles ="Patient")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpPost]
+        public async Task<ActionResult<APIResponse>> AddPatient([FromBody] CreatePatientDto patient)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.CreateOperationFailed;
+                    _response.AddError(ModelState.ToString());
+                }
+                else
+                {
+                    var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
+
+                    var createdPatient = await _patientService.CreatePatientAsync(patient,userId);
+
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
+                    _response.IsSuccess = true;
+                    _response.Result = createdPatient;
+                }
+
+                    
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.CreateOperationFailed;
+                _response.AddError(CommonMessages.SystemError);
+            }            
+
+            return Ok(_response);
+        }
+
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpGet]
+        //public async Task<ActionResult<APIResponse>> GetPatients()
+        //{
+        //    try
+        //    {
+        //        var patients = await _patientService.GetAllPatientsAsync();
+        //        _response.StatusCode = HttpStatusCode.OK;
+        //        _response.IsSuccess = true;
+        //        _response.Result = patients;
+        //    }
+        //    catch(Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;               
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }            
+
+        //    return Ok(_response);
+        //}
+
+        /// <summary>
+        /// Retrieves the profile information for the currently authenticated patient.
+        /// </summary>
+        /// <returns>An ActionResult containing an APIResponse with the patient's profile data if found; otherwise, an error
+        /// message.</returns>
+        [Authorize(Roles = "Patient")]
+        [ProducesResponseType(StatusCodes.Status200OK)]        
+        [HttpGet("Patient-Profile")]       
+        public async Task<ActionResult<APIResponse>> GetPatientProfile()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
+
+                var patient = await _patientService.GetPatientProfileAsync(userId);
+
+                if (patient == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.DisplayMessage = CommonMessages.RecordNotFound;
+                }
+                else
+                {
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.IsSuccess = true;
+                    _response.Result = patient;
+                }
+                    
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.AddError(CommonMessages.SystemError);
+            }            
+
+            return Ok(_response);
+        }
+
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpPatch("{id}")]
+        //public async Task<ActionResult> UpdatePatient(int id, UpdatePatientDto patient)
+        //{
+        //    try
+        //    {
+        //        if (!ModelState.IsValid)
+        //        {
+        //            _response.StatusCode = HttpStatusCode.BadRequest;
+        //            _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+        //            _response.AddError(ModelState.ToString());
+        //        }
+        //        else
+        //        {
+        //            await _patientService.UpdatePatientAsync(id, patient);
+
+        //            _response.StatusCode = HttpStatusCode.Created;
+        //            _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
+        //            _response.IsSuccess = true;
+        //        }
+
+                   
+        //    }
+        //    catch (Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;
+        //        _response.DisplayMessage = CommonMessages.UpdateOperationFailed;
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }
+
+        //    return Ok(_response);
+
+        //}
+
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[HttpDelete("{id}")]
+        //public async Task<ActionResult> DeletePatient(int id)
+        //{
+
+        //    try
+        //    {
+        //        if (id == 0)
+        //        {
+        //            _response.StatusCode = HttpStatusCode.BadRequest;
+        //            _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+        //            _response.AddError(ModelState.ToString());
+        //        }
+        //        else
+        //        {
+
+        //            var patient = await _patientService.GetPatientByIdAsync(id);
+
+        //            if (patient == null)
+        //            {
+        //                _response.StatusCode = HttpStatusCode.NotFound;
+        //                _response.DisplayMessage = CommonMessages.RecordNotFound;
+        //                _response.AddError(ModelState.ToString());
+        //            }
+        //            else
+        //            {
+        //                await _patientService.DeletePatientAsync(id);
+
+        //                _response.StatusCode = HttpStatusCode.NoContent;
+        //                _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+        //                _response.IsSuccess = true;
+        //            }
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        _response.StatusCode = HttpStatusCode.InternalServerError;
+        //        _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
+        //        _response.AddError(CommonMessages.SystemError);
+        //    }            
+
+        //    return Ok(_response);
+
+        //}
+    }
+}
+

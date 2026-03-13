@@ -1,4 +1,5 @@
 ﻿using AppointmentBooking.Application.Common;
+using AppointmentBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System;

@@ -9,10 +9,12 @@ namespace AppointmentBooking.Application.Services.Interface
 {
     public interface IPatientService
     {
-        Task<PatientDto> GetPatientByIdAsync(int id);
+        Task<PatientDto> GetPatientProfileAsync(string userId);
         Task<IEnumerable<PatientDto>> GetAllPatientsAsync();
+        Task<PatientDto> GetPatientByIdAsync(int id);
         Task<PatientDto> CreatePatientAsync(CreatePatientDto patientDto, string userId);
         Task UpdatePatientAsync(int id, UpdatePatientDto updatePatientDto);
         Task DeletePatientAsync(int id);
+       
     }
 }

@@ -35,6 +35,16 @@ namespace AppointmentBooking.Application.ApplicationConstants
         public const string InternalServerError = "An unexpected error occurred on the server.";
         public const string Unauthorized = "You are not authorized to access this resource.";
         public const string Forbidden = "You do not have permission to access this resource.";
-       
+
+        public const string AppointmentCreatedSuccess = "Appointment created successfully.";
+        public const string AppointmentCreationFailed = "Failed to create the appointment.";
+
+        public const string AppointementRescheduledSuccess = "Appointment rescheduled successfully.";
+        public const string AppointementRescheduledFailed = "Failed to reschedule the appointment.";
+
+        public const string AppointementCancelledSuccess = "Appointment cancelled successfully.";
+        public const string AppointementCancellationFailed = "Failed to cancel the appointment.";
+
+
     }
 }

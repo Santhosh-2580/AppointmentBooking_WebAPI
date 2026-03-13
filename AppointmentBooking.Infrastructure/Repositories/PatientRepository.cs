@@ -1,4 +1,5 @@
-﻿using AppointmentBooking.Domain.Corntracts;
+﻿#nullable enable
+using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Domain.Models;
 using AppointmentBooking.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,13 @@ namespace AppointmentBooking.Infrastructure.Repositories
         public PatientRepository(AppointmentDbContext dbContext) : base(dbContext)
         {
             
+        }
+
+        public async Task<IEnumerable<Patient>> GetActivePatientsAsync()
+        {
+            return await _dbContext.Patients
+                           .Where(p => p.IsActive)
+                           .ToListAsync();
         }
 
         public async Task<Patient?> GetByUserIdAsync(string userId)

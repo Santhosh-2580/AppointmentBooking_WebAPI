@@ -20,9 +20,10 @@ namespace AppointmentBooking.Domain.Models
 
         [Required]
         public DateOnly DateOfBirth { get; set; }
-        public Gender Gender { get; set; }
+        public Gender Gender { get; set; }       
 
         public ICollection<Appointment> Appointments { get; set; }
+        public bool IsActive { get; set; } = true;
 
     }
 }

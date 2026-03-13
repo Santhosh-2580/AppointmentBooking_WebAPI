@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppointmentBooking.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -29,5 +30,6 @@ namespace AppointmentBooking.Application.DTO.Doctor
 
         [Required]
         public string Password { get; set; }
+        public Gender Gender { get; set; }
     }
 }

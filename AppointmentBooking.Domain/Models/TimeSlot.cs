@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace AppointmentBooking.Domain.Models
 {
     public class TimeSlot : BaseModel
-    {
+    {       
         // 👇 FK
         public int DoctorId { get; set; }
         public Doctor Doctor { get; set; }
@@ -17,7 +17,7 @@ namespace AppointmentBooking.Domain.Models
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 
-        public int MaxPatients { get; set; } = 3;
+        public int MaxPatients { get; set; }
         public int BookedCount { get; set; } = 0;
 
         

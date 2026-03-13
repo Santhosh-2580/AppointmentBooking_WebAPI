@@ -13,6 +13,9 @@ namespace AppointmentBooking.Domain.Corntracts
         Task UpdateAsync(TimeSlot timeSlot);
         Task<bool> ExistsAsync(Expression<Func<TimeSlot, bool>> predicate);
         Task<IEnumerable<TimeSlot>> GetAllTimeSlotsAsync();
+        Task<IEnumerable<TimeSlot>> GetTimeSlotsByDoctorIdAsync(int doctorId);
+        Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync();
+        Task<TimeSlot> GetTimeSlotsWithDoctorDetailsAsync(Expression<Func<TimeSlot, bool>> filter);
 
     }
 }

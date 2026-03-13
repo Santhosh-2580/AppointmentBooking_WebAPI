@@ -11,8 +11,6 @@ namespace AppointmentBooking.Application.DTO.Appointment
     public class CreateAppointmentDto
     {
         [Required]
-        public int TimeSlotId { get; set; }
-        [Required]
-        public int PatientId { get; set; }       
+        public int TimeSlotId { get; set; }             
     }
 }

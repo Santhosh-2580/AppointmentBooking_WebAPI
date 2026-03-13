@@ -4,14 +4,16 @@ using AppointmentBooking.Application.DTO.Patient;
 using AppointmentBooking.Application.InputModels;
 using AppointmentBooking.Application.Services;
 using AppointmentBooking.Application.Services.Interface;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace AppointmentBooking.Web.Controllers
+namespace AppointmentBooking.Web.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiversion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class UserController : ControllerBase
     {
         private readonly IAuthService _authService;

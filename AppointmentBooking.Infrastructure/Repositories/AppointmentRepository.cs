@@ -35,6 +35,38 @@ namespace AppointmentBooking.Infrastructure.Repositories
                         .ToListAsync();
         }
 
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByDateAsync(DateOnly date)
+        {
+            return await _dbContext.Appointments
+                 .Include(a => a.Patient)
+                 .Include(a => a.TimeSlot)
+                 .ThenInclude(ts => ts.Doctor)
+                 .Where(a => a.TimeSlot.SlotDate == date)
+                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByDoctorIdAsync(int doctorId)
+        {
+            return await _dbContext.Appointments
+                .AsNoTracking()
+                        .Include(a => a.Patient)
+                        .Include(a => a.TimeSlot)
+                        .ThenInclude(ts => ts.Doctor)
+                        .Where(a => a.TimeSlot.DoctorId == doctorId && a.Status == AppointmentStatus.Booked)
+                        .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByPatientIdAsync(int patientId)
+        {
+           return await _dbContext.Appointments
+                .AsNoTracking()
+                        .Include(a => a.Patient)
+                        .Include(a => a.TimeSlot)
+                        .ThenInclude(ts => ts.Doctor)
+                        .Where(a => a.PatientId == patientId && a.Status == AppointmentStatus.Booked)
+                        .ToListAsync();
+        }
+
         public async Task UpdateAsync(Appointment appointment)
         {
             _dbContext.Update(appointment);
