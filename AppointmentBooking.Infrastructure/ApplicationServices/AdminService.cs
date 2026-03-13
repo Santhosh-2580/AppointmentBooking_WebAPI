@@ -165,17 +165,19 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
 
         }
 
-        public async Task DeactivatePatientAsync(int id)
+        public async Task<bool> DeactivatePatientAsync(int id)
         {
             var patient = await _patientRepository.GetByIdAsync(p => p.Id == id);
             if (patient == null)
                 throw new KeyNotFoundException("Patient not found.");
 
             if (!patient.IsActive)
-                return;
+                return false;
 
             patient.IsActive = false;
             await _patientRepository.UpdateAsync(patient);
+
+            return true;
         }
         public async Task<PatientDto> GetPatientByIdAsync(int id)
         {
@@ -245,6 +247,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
                     ExperienceYears = d.ExperienceYears,
                     Email = user != null ? user.Email : "Unknown",
                     MobileNumber = user != null ? user.PhoneNumber : "Unknown",
+                    IsActive = d.IsActive
                 };
 
             }).ToList();
@@ -268,14 +271,30 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
                 RegistrationNumber = doctor.RegistrationNumber,
                 Specialty = doctor.Specialty,               
                 Email = user.Email,
-                Gender = doctor.Gender
+                Gender = doctor.Gender,
+                IsActive = doctor.IsActive
 
             };
         }
 
+        public async Task<bool> DeactivateDoctorAsync(int id)
+        {
+            var doctor = await _doctorRepository.GetByIdAsync(p => p.Id == id);
+            if (doctor == null)
+                throw new KeyNotFoundException("Patient not found.");
+
+            if (!doctor.IsActive)
+                return false;
+
+            doctor.IsActive = false;
+            await _doctorRepository.UpdateAsync(doctor);
+
+            return true;
+        }
+
         public async Task<IEnumerable<TimeSlotsDto>> GetAllTimeSlotsAsync()
         {
-            var timeSlots = await _timeSlotRepository.GetAvailableTimeSlotsAsync();
+            var timeSlots = await _timeSlotRepository.GetAllTimeSlotsAsync();
             return _mapper.Map<List<TimeSlotsDto>>(timeSlots);
         }
         public async Task<IEnumerable<TimeSlotsDto>> GetTimeSlotsByDoctorAsync(int doctorId)
@@ -330,6 +349,6 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
 
         }
 
-
+       
     }
 }

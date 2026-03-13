@@ -4,31 +4,38 @@ using AppointmentBooking.Application.DTO.Doctor;
 using AppointmentBooking.Application.Services.Interface;
 using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Domain.Models;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace AppointmentBooking.Web.Controllers
+
+namespace AppointmentBooking.Web.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiversion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
+
     public class DoctorController : ControllerBase
     {
 
         private readonly IDoctorService _doctorService;
         protected APIResponse _response;
+        private readonly ILogger<AdminController> _logger;
 
-        public DoctorController(IDoctorService doctorService)
+        public DoctorController(IDoctorService doctorService, ILogger<AdminController> logger)
         {
             _doctorService = doctorService;
             _response = new APIResponse();
+            _logger = logger;
         }
 
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]       
-        [HttpPost]
+        [HttpPost("Add-Doctor")]
         public async Task<ActionResult<APIResponse>> AddDoctor([FromBody] CreateDoctorDto doctor)
         {
             try
@@ -37,17 +44,23 @@ namespace AppointmentBooking.Web.Controllers
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.DisplayMessage = CommonMessages.CreateOperationFailed;
-                    _response.AddError(ModelState.ToString());                    
+                    _response.AddError(ModelState.ToString());     
+                    _logger.LogWarning("Invalid model state for creating doctor: {ModelState}", ModelState);
+                    return _response;
                 }
 
                 else
                 {
+                    var userName = User?.FindFirstValue(ClaimTypes.Name) ?? "Unknown";
+
                     var createdDoctor = await _doctorService.CreateDoctorAsync(doctor);
 
                     _response.StatusCode = HttpStatusCode.Created;
                     _response.DisplayMessage = CommonMessages.CreateOperationSuccess;
                     _response.IsSuccess = true;
                     _response.Result = createdDoctor;
+                    _logger.LogInformation("Doctor created successfully with ID: {DoctorId} by {userName}", createdDoctor.Id, userName);
+                    return Ok(_response);
                 }                
 
             }
@@ -56,9 +69,10 @@ namespace AppointmentBooking.Web.Controllers
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.DisplayMessage = CommonMessages.CreateOperationFailed;
                 _response.AddError(CommonMessages.SystemError);
+                _logger.LogError("An error occurred while creating doctor: {ErrorMessage}", CommonMessages.SystemError);
+                return _response;
             }
-
-            return Ok(_response);
+          
         }
 
         /// <summary>
@@ -78,15 +92,17 @@ namespace AppointmentBooking.Web.Controllers
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.IsSuccess = true;
                 _response.Result = doctors;
+                _logger.LogInformation("Retrieved all doctors successfully. Total count: {DoctorCount}", doctors.Count());
+                return Ok(_response);
             }
             catch (Exception)
             {
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.AddError(CommonMessages.SystemError);
+                _logger.LogError("An error occurred while retrieving doctors: {ErrorMessage}", CommonMessages.SystemError);
+                 return Ok(_response);
             }
-
-
-            return Ok(_response);
+           
         }
 
         /// <summary>
@@ -107,12 +123,17 @@ namespace AppointmentBooking.Web.Controllers
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     _response.DisplayMessage = CommonMessages.RecordNotFound;
+                    _response.AddError(ModelState.ToString());
+                    _logger.LogWarning("Doctor with ID: {DoctorId} not found.", id);
+                    return Ok(_response);
                 }
                 else
                 {
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.IsSuccess = true;
                     _response.Result = doctor;
+                    _logger.LogInformation("Retrieved doctor details successfully for ID: {DoctorId}", id);
+                    return Ok(_response);
                 }
 
             }
@@ -120,8 +141,9 @@ namespace AppointmentBooking.Web.Controllers
             {
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.AddError(CommonMessages.SystemError);
-            }
-            return Ok(_response);
+                _logger.LogError("An error occurred while retrieving doctor details for ID: {DoctorId}. Error: {ErrorMessage}", id, CommonMessages.SystemError);
+                return Ok(_response);
+            }           
 
         }
 

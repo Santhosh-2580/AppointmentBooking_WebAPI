@@ -30,7 +30,8 @@ namespace AppointmentBooking.Infrastructure
             services.AddScoped<IDoctorService , DoctorService>();
             services.AddScoped<IPatientService , PatientService>();
             services.AddScoped<ITimeSlotService , TimeSlotService>();
-            services.AddScoped<IAppointmentService , AppointmentService>();
+            services.AddScoped<IAppointmentService , AppointmentService>();           
+            services.AddScoped<IAdminService, AdminService>();
             return services;
         }
     }

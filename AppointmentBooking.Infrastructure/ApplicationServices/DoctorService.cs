@@ -27,7 +27,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             _mapper = mapper;
         }
 
-        public async Task<CreateDoctorDto> CreateDoctorAsync(CreateDoctorDto doctorDto)
+        public async Task<DoctorDto> CreateDoctorAsync(CreateDoctorDto doctorDto)
         {
             var user = new ApplicationUser
             {
@@ -51,7 +51,18 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             doctorEntity.UserId = user.Id;
 
             var createdDoctor = await _doctorRepository.CreateAsync(doctorEntity);
-            return _mapper.Map<CreateDoctorDto>(createdDoctor);
+
+            return new DoctorDto
+            {
+                Id = createdDoctor.Id,
+                DoctorName = createdDoctor.DoctorName,
+                Specialty = createdDoctor.Specialty,
+                RegistrationNumber = createdDoctor.RegistrationNumber,
+                ExperienceYears = createdDoctor.ExperienceYears,
+                Email = user.Email,
+                MobileNumber = user.PhoneNumber,   
+                IsActive = createdDoctor.IsActive,
+            };
         }
 
         public async Task DeleteDoctorAsync(int id)

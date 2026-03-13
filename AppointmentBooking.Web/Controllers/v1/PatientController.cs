@@ -3,6 +3,7 @@ using AppointmentBooking.Application.Common;
 using AppointmentBooking.Application.DTO.Patient;
 using AppointmentBooking.Application.Services.Interface;
 using AppointmentBooking.Domain.Models;
+using Asp.Versioning;
 using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,10 +11,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Security.Claims;
 
-namespace AppointmentBooking.Web.Controllers
+namespace AppointmentBooking.Web.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiversion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class PatientController : ControllerBase
     {
         private readonly IPatientService _patientService;

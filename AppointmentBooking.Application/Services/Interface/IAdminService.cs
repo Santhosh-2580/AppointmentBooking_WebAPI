@@ -18,10 +18,11 @@ namespace AppointmentBooking.Application.Services.Interface
 
         Task<IEnumerable<PatientDto>> GetAllPatientsAsync();
         Task<PatientDto> GetPatientByIdAsync(int id);
-        Task DeactivatePatientAsync(int id);
+        Task<bool> DeactivatePatientAsync(int id);
 
         Task<IEnumerable<DoctorDto>> GetAllDoctorsAsync();
         Task<DoctorDto> GetDoctorByIdAsync(int id);
+        Task<bool> DeactivateDoctorAsync(int id);
 
         Task<IEnumerable<TimeSlotsDto>> GetAllTimeSlotsAsync();
         Task<IEnumerable<TimeSlotsDto>> GetTimeSlotsByDoctorAsync(int doctorId);

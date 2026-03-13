@@ -5,6 +5,7 @@ using AppointmentBooking.Application.Services;
 using AppointmentBooking.Application.Services.Interface;
 using AppointmentBooking.Domain.Corntracts;
 using AppointmentBooking.Domain.Models;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +13,11 @@ using System.Net;
 using System.Numerics;
 using System.Security.Claims;
 
-namespace AppointmentBooking.Web.Controllers
+namespace AppointmentBooking.Web.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiversion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class TimeSlotController : ControllerBase
     {
         private readonly ITimeSlotService _timeSlotService;
