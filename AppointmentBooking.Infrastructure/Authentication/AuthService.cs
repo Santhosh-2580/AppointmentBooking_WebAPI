@@ -140,7 +140,7 @@ namespace AppointmentBooking.Infrastructure.Authentication
             new Claim(ClaimTypes.Email, ApplicationUser.Email),
 
             // Stores username
-            new Claim(ClaimTypes.Name, ApplicationUser.UserName)
+            new Claim(ClaimTypes.Name, ApplicationUser.FirstName)
         };
 
                 // Add Role claims to main claims list

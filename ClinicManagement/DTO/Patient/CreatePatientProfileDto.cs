@@ -1,4 +1,5 @@
-﻿using AppointmentBooking.Domain.Enums;
+﻿
+using ClinicManagement.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -6,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppointmentBooking.Application.DTO.Patient
+namespace ClinicManagement.DTO.Patient
 {
-    public class CreatePatientDto
+    public class CreatePatientProfileDto
     {
        
         [Required]

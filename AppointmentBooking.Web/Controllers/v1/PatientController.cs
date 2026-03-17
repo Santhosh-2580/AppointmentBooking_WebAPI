@@ -38,7 +38,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         [Authorize(Roles ="Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<ActionResult<APIResponse>> AddPatient([FromBody] CreatePatientDto patient)
+        public async Task<ActionResult<APIResponse>> AddPatient([FromBody] CreatePatientProfileDto patient)
         {
             try
             {
@@ -46,7 +46,9 @@ namespace AppointmentBooking.Web.Controllers.v1
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.DisplayMessage = CommonMessages.CreateOperationFailed;
-                    _response.AddError(ModelState.ToString());
+                    _response.AddError(string.Join(",", ModelState.Values
+                            .SelectMany(v => v.Errors)
+                                .Select(e => e.ErrorMessage)));
                 }
                 else
                 {
@@ -99,7 +101,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// message.</returns>
         [Authorize(Roles = "Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]        
-        [HttpGet("Patient-Profile")]       
+        [HttpGet("Profile")]       
         public async Task<ActionResult<APIResponse>> GetPatientProfile()
         {
             try

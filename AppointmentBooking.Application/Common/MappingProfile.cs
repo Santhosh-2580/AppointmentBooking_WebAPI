@@ -27,7 +27,7 @@ namespace AppointmentBooking.Application.Common
                 .ForMember(x => x.DoctorName, opt => opt.MapFrom(src => src.Doctor.DoctorName))
                 .ForMember(x => x.Specialty, opt => opt.MapFrom(src => src.Doctor.Specialty));
 
-            CreateMap<Patient, CreatePatientDto>().ReverseMap();
+            CreateMap<Patient, CreatePatientProfileDto>().ReverseMap();
             CreateMap<Patient, UpdatePatientDto>().ReverseMap();
             CreateMap<Patient, PatientDto>().ReverseMap();
                 

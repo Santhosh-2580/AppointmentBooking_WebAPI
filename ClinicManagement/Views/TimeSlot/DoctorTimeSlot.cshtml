@@ -1,0 +1,89 @@
+﻿@using ClinicManagement.DTO.TimeSlot
+@model IEnumerable<TimeSlotsDto>
+
+@{
+    ViewData["Title"] = "Doctor Time Slots";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">My Time Slots</h2>
+
+    <div class="mb-3 text-end">
+        <a asp-action="CreateSlot" class="btn btn-primary">
+            + Create Slot
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            No time slots found.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Max Patients</th>
+                        <th>Booked</th>
+                        <th>Available</th>
+                        <th>Status</th>
+                        <th style="width:150px;">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody class="text-center">
+                    @foreach (var slot in Model)
+                    {
+                        var available = slot.MaxPatients - slot.BookedCount;
+                        var isFull = available <= 0;
+
+                        <tr class="@(isFull ? "table-danger" : "")">
+                            <td>@slot.SlotDate.ToString("dd-MM-yyyy")</td>
+
+                            <td>
+                                @slot.StartTime.ToString(@"hh\:mm")
+                                -
+                                @slot.EndTime.ToString(@"hh\:mm")
+                            </td>
+
+                            <td>@slot.MaxPatients</td>
+                            <td>@slot.BookedCount</td>
+                            <td>@available</td>
+
+                            <td>
+                                @if (isFull)
+                                {
+                                    <span class="badge bg-danger">Full</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Available</span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-action="EditSlot"
+                                   asp-route-id="@slot.Id"
+                                   class="btn btn-sm btn-warning me-1">
+                                    Edit
+                                </a>
+
+                                <a asp-action="DeleteSlot"
+                                   asp-route-id="@slot.Id"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Are you sure you want to delete this slot?');">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

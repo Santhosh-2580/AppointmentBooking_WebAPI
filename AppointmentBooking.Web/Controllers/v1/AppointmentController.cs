@@ -41,7 +41,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <returns>An API response containing the result of the create operation.</returns>
         [Authorize(Roles = "Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpPost("Create-Appointment")]
+        [HttpPost("Create")]
         public async Task<ActionResult<APIResponse>> CreateAppointment([FromBody] CreateAppointmentDto Appointment)
         {
             try
@@ -100,7 +100,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <returns>An ActionResult containing an APIResponse with the user's appointments.</returns>
         [Authorize(Roles ="Doctor,Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpGet("My-Appointments")]
+        [HttpGet("MyAppointments")]
         public async Task<ActionResult<APIResponse>> GetMyAppointments()
         {
             try
@@ -199,10 +199,11 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// Allows a user to reschedule an existing appointment by providing the appointment ID and the new time slot ID. The user must be authorized as a patient to perform this action.
         /// </summary>
         /// <param name="rescheduleAppointmentDto"></param>
+        /// <param name="appointmentId"></param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpPatch("Reschedule_Appointment")]
-        public async Task<ActionResult<APIResponse>> RescheduleAppointment(RescheduleAppointmentDto rescheduleAppointmentDto)
+        [HttpPatch("{AppointmentId}/reschedule")]       
+        public async Task<ActionResult<APIResponse>> RescheduleAppointment(RescheduleAppointmentDto rescheduleAppointmentDto, int appointmentId)
         {
             try
             {
@@ -227,7 +228,7 @@ namespace AppointmentBooking.Web.Controllers.v1
                 else
                 {
                     var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
-                    await _appointmentService.RescheduleAppointmentAsync(userId, rescheduleAppointmentDto);
+                    await _appointmentService.RescheduleAppointmentAsync(userId, rescheduleAppointmentDto,appointmentId);
 
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.DisplayMessage = CommonMessages.AppointementRescheduledSuccess;
@@ -300,7 +301,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <param name="AppointmentId"></param>
         /// <returns></returns>
         [Authorize(Roles = "Patient")]
-        [HttpPatch("{AppointmentId}/Cancel_Appointment")]
+        [HttpPatch("{AppointmentId}/Cancel")]
         public async Task<IActionResult> CancelAppointment(int AppointmentId)
         {
             try

@@ -19,6 +19,6 @@ namespace AppointmentBooking.Application.Services.Interface
 
         Task<List<AppointmentsDto>> GetAppointmentsForUserAsync(string userId, string role);
         Task CancelAppointmentAsync(string userId, int AppointmentId);
-        Task RescheduleAppointmentAsync(string userId, RescheduleAppointmentDto dto);
+        Task RescheduleAppointmentAsync(string userId, RescheduleAppointmentDto dto,int appointmentId);
     }
 }

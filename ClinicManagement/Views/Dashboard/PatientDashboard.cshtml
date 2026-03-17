@@ -1,0 +1,49 @@
+﻿@using ClinicManagement.DTO.Appointment
+@model List<AppointmentsDto>
+
+    @if(Model != null && Model.Any())
+{
+    <h3 class="mb-4">My Upcoming Appointments</h3>
+
+    <table class="table table-striped table-bordered">
+
+        <thead class="table-dark">
+
+            <tr>
+                <th>Appointment Id</th>
+                <th>Doctor Name</th>
+                <th>Specialty</th>
+                <th>Appointment Date</th>
+                <th>Slot Time</th>
+                <th>Status</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.DoctorName</td>
+                    <td>@item.Specialty</td>
+                    <td>@item.SlotDate</td>
+                    <td>@item.StartTime - @item.EndTime</td>
+                    <td>@item.Status</td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        You have no upcoming appointments.
+    </div>
+}
+
+

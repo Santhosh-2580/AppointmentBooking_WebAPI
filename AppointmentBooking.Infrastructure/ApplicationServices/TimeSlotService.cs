@@ -110,7 +110,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
         //    return result;
         //}
 
-        public async Task UpdateTimeSlotAsync(string userId, UpdateTimeSlotDto dto)
+        public async Task UpdateTimeSlotAsync(string userId, UpdateTimeSlotDto dto, int timeSlotId)
         {
             // 1️. Get doctor using logged-in user
             var doctor = await _doctorRepository.GetByUserIdAsync(userId);
@@ -120,7 +120,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
 
             // 2️. Get existing slot
             var existingSlot = await _timeSlotRepository
-                .GetByIdAsync(ts => ts.Id == dto.Id);
+                .GetByIdAsync(ts => ts.Id == timeSlotId);
 
             if (existingSlot == null)
                 throw new KeyNotFoundException("TimeSlot not found");
@@ -155,7 +155,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             var isOverlapping = await _timeSlotRepository.ExistsAsync(t =>
                 t.DoctorId == doctor.Id &&
                 t.SlotDate == dto.SlotDate &&
-                t.Id != dto.Id &&
+                t.Id != timeSlotId &&
                 dto.StartTime < t.EndTime &&
                 dto.EndTime > t.StartTime
             );

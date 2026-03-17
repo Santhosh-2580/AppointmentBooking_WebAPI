@@ -1,0 +1,33 @@
+﻿<script>
+    toastr.options = {
+        "positionClass": "toast-top-right",
+        "closeButton": true,
+        "progressBar": true,
+        "timeOut": "5000"
+    };
+
+    $(document).ready(function () {
+
+        var success = '@TempData["Success"]';
+        var error = '@TempData["Error"]';
+        var info = '@TempData["Info"]';
+        var warning = '@TempData["Warning"]';
+
+        if (success) {
+            toastr.success(success);
+        }
+
+        if (error) {
+            toastr.error(error);
+        }
+
+        if (info) {
+            toastr.info(info);
+        }
+
+        if (warning) {
+            toastr.warning(warning);
+        }
+
+    });
+</script>

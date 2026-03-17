@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ClinicManagement</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ClinicManagement.styles.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+</head>
+<body>
+
+    <header>
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <span class="navbar-brand">Clinic Management System</span>
+
+                <span class="text-white">
+                    Role : @Context.Session.GetString("Role")
+                </span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="d-flex">
+
+        <div class="row">
+
+            <!-- Sidebar -->
+
+            <div class="sidebar">
+
+                <div class="sidebar-header text-center">
+                    <h5 class="fw-bold">@Context.Session.GetString("Name")</h5>
+                    <small class="text-muted">@Context.Session.GetString("Role")</small>
+                </div>
+
+                <ul class="nav flex-column mt-3">
+
+                    @{
+                        var role = Context.Session.GetString("Role");
+                    }
+
+                    @if (role == "Patient")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link active" asp-controller="Dashboard" asp-action="PatientDashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Patient" asp-action="CreatePatientProfile">
+                                <i class="bi bi-person-plus"></i> Create Profile
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Timeslot" asp-action="AvailableSlots">
+                                <i class="bi bi-calendar"></i> Available Slots
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Patient" asp-action="ViewPatientProfile">
+                                <i class="bi bi-person"></i> My Profile
+                            </a>
+                        </li>
+                    }
+
+                    @if (role == "Doctor")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Dashboard" asp-action="DoctorDashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Timeslot" asp-action="Create">
+                                <i class="bi bi-plus-circle"></i> Create Timeslot
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Timeslot" asp-action="MySlots">
+                                <i class="bi bi-calendar-check"></i> My Timeslots
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Appointment" asp-action="DoctorAppointments">
+                                <i class="bi bi-clipboard-check"></i> Appointments
+                            </a>
+                        </li>
+                    }
+
+                    @if (role == "Admin")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Dashboard" asp-action="AdminDashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Doctor" asp-action="Index">
+                                <i class="bi bi-person-badge"></i> Doctors
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Patient" asp-action="Index">
+                                <i class="bi bi-people"></i> Patients
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Appointment" asp-action="Index">
+                                <i class="bi bi-calendar-event"></i> Appointments
+                            </a>
+                        </li>
+                    }
+
+                    <li class="nav-item mt-4">
+                        <a class="nav-link text-danger" asp-controller="Account" asp-action="Login">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- Main Content -->
+
+            <div class="content p-4">
+
+                @RenderBody()
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - ClinicManagement
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js"></script>
+
+   
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <partial name="_Toast" />
+
+    @await RenderSectionAsync("Scripts", required: false)   
+
+</body>
+</html>
+

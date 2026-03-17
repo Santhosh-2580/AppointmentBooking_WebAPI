@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 namespace AppointmentBooking.Application.DTO.TimeSlot
 {
     public class UpdateTimeSlotDto
-    {
-        public int Id { get; set; }       
+    {          
 
         public DateOnly? SlotDate { get; set; }
 

@@ -35,7 +35,7 @@ namespace AppointmentBooking.Web.Controllers.v1
 
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]       
-        [HttpPost("Add-Doctor")]
+        [HttpPost("Add")]
         public async Task<ActionResult<APIResponse>> AddDoctor([FromBody] CreateDoctorDto doctor)
         {
             try
@@ -81,7 +81,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <returns></returns>
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpGet("View-all-doctors")]
+        [HttpGet("Doctors")]
         public async Task<ActionResult<APIResponse>> GetDoctors()
         {
             try

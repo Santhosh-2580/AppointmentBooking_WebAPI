@@ -1,0 +1,70 @@
+﻿@using ClinicManagement.DTO.TimeSlot
+@model CreateTimeSlotDto
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+
+        <div class="col-md-7 col-lg-5">
+
+            <div class="card shadow border-0 p-4" style="border-radius:12px;">
+
+                <h3 class="mb-4 text-center">Create Time Slot</h3>
+
+                <form asp-action="CreateTimeSlot" method="post">
+
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <!-- Slot Date -->
+                    <div class="mb-3">
+                        <label asp-for="SlotDate" class="form-label"></label>
+                        <input asp-for="SlotDate" type="date" class="form-control form-control-lg" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="SlotDate" class="text-danger"></span>
+                    </div>
+
+                    <!-- Start Time -->
+                    <div class="mb-3">
+                        <label asp-for="StartTime" class="form-label"></label>
+                        <input asp-for="StartTime" type="time" class="form-control form-control-lg" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+
+                    <!-- End Time -->
+                    <div class="mb-3">
+                        <label asp-for="EndTime" class="form-label"></label>
+                        <input asp-for="EndTime" type="time" class="form-control form-control-lg" />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                    </div>
+
+                    <!-- Max Patients -->
+                    <div class="mb-3">
+                        <label asp-for="MaxPatients" class="form-label"></label>
+                        <input asp-for="MaxPatients" type="number" min="1" class="form-control form-control-lg" />
+                        <span asp-validation-for="MaxPatients" class="text-danger"></span>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        Add Time Slot
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.querySelector("form").addEventListener("submit", function (e) {
+            var start = document.querySelector("[name='StartTime']").value;
+            var end = document.querySelector("[name='EndTime']").value;
+
+            if (start >= end) {
+                alert("Start Time must be less than End Time");
+                e.preventDefault();
+            }
+        });
+    </script>
+}

@@ -35,7 +35,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <returns></returns>
         [Authorize(Roles ="Doctor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpPost("Add-TimeSlot")]
+        [HttpPost("Add")]
         public async Task<ActionResult<APIResponse>> AddTimeSlot([FromBody] CreateTimeSlotDto TimeSlot)
         {
 
@@ -170,8 +170,8 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <returns></returns>
         [Authorize(Roles = "Doctor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpPatch("{id}")]
-        public async Task<ActionResult<APIResponse>> UpdateTimeSlot(UpdateTimeSlotDto doctor)
+        [HttpPatch("{timeslotId}/update")]
+        public async Task<ActionResult<APIResponse>> UpdateTimeSlot(UpdateTimeSlotDto doctor, int timeslotId)
         {
             try
             {
@@ -185,7 +185,7 @@ namespace AppointmentBooking.Web.Controllers.v1
                 {
                     var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
 
-                    await _timeSlotService.UpdateTimeSlotAsync(userId, doctor);
+                    await _timeSlotService.UpdateTimeSlotAsync(userId, doctor, timeslotId);
 
                     _response.StatusCode = HttpStatusCode.Created;
                     _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;

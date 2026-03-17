@@ -27,7 +27,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             _mapper = mapper;
         }
 
-        public async Task<PatientDto> CreatePatientAsync(CreatePatientDto patientDto, string userId)
+        public async Task<PatientDto> CreatePatientAsync(CreatePatientProfileDto patientDto, string userId)
         {
             var existingPatient = await _patientRepository.GetByUserIdAsync(userId);
             if (existingPatient != null)

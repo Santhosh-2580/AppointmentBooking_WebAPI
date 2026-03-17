@@ -1,0 +1,66 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    overflow-x: hidden; /* prevents horizontal scroll */
+}
+
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    top: 56px;
+    left:0;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+}
+
+.sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.sidebar .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .sidebar .nav-link:hover {
+        background-color: #e9ecef;
+    }
+
+    .sidebar .nav-link.active {
+        background-color: #6f42c1;
+        color: white;
+    }
+
+.content {
+    margin-left: 240px;
+    padding-top:20px;
+}
+
+.toast-top-right {
+    top: 80px !important; /* default is ~12px */
+}

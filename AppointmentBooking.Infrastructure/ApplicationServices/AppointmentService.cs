@@ -264,7 +264,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             }).ToList();
         }
 
-        public async Task RescheduleAppointmentAsync(string userId, RescheduleAppointmentDto dto)
+        public async Task RescheduleAppointmentAsync(string userId, RescheduleAppointmentDto dto, int appointmentId)
         {
             await _unitOfWork.BeginTransactionAsync();
 
@@ -277,7 +277,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
 
                 // Get Appointment
                 var appointment = await _appointmentRepository
-                    .GetByIdAsync(a => a.Id == dto.AppointmentId);
+                    .GetByIdAsync(a => a.Id == appointmentId);
 
                 if (appointment == null)
                     throw new KeyNotFoundException("Appointment not found.");

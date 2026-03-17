@@ -1,0 +1,49 @@
+﻿@using ClinicManagement.DTO.TimeSlot
+@model List<TimeSlotsDto>
+
+<h3>Available Slots</h3>
+
+<table class="table table-hover table-bordered">
+
+    <thead class="table-dark">
+
+        <tr>
+            
+            <th>Doctor Name</th>
+            <th>Specialty</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Available</th>
+            <th>Action</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        @foreach (var slot in Model)
+        {
+
+            <tr>
+
+                <td>@slot.DoctorName</td>
+                <td>@slot.Specialty</td>
+                <td>@slot.SlotDate</td>
+                <td>@slot.StartTime - @slot.EndTime</td>
+                <td>@(slot.MaxPatients - slot.BookedCount)</td>
+
+                <td>
+                    <a class="btn btn-success btn-sm"
+                       href="/Appointment/Book/@slot.Id">
+                        Book
+                    </a>
+                </td>
+
+            </tr>
+
+        }
+
+    </tbody>
+
+</table>
