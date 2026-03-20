@@ -139,7 +139,9 @@ namespace AppointmentBooking.Web.Controllers.v1
         {
             try
             {
-                var TimeSlot = await _timeSlotService.GetAllAvailableTimeSlotsAsync();
+                var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
+
+                var TimeSlot = await _timeSlotService.GetAllAvailableTimeSlotsAsync(userId);
 
                 if (TimeSlot == null || !TimeSlot.Any())
                 {

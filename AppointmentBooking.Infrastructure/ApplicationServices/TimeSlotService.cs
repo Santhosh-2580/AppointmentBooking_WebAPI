@@ -1,10 +1,13 @@
 ﻿using AppointmentBooking.Application.DTO.TimeSlot;
 using AppointmentBooking.Application.Services.Interface;
 using AppointmentBooking.Domain.Corntracts;
+using AppointmentBooking.Domain.Enums;
 using AppointmentBooking.Domain.Models;
 using AppointmentBooking.Infrastructure.Identity;
+using AppointmentBooking.Infrastructure.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,13 +21,17 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ITimeSlotRepository _timeSlotRepository;
         private readonly IDoctorRepository _doctorRepository;
+        private readonly IAppointmentRepository _appointmentRepository;
+        private readonly IPatientRepository _patientRepository;
         private readonly IMapper _mapper;
-        public TimeSlotService(ITimeSlotRepository timeSlotRepository, IMapper mapper, UserManager<ApplicationUser> userManager, IDoctorRepository doctorRepository)
+        public TimeSlotService(ITimeSlotRepository timeSlotRepository, IMapper mapper, UserManager<ApplicationUser> userManager, IDoctorRepository doctorRepository,IPatientRepository patientRepository,IAppointmentRepository appointmentRepository)
         {
             _mapper = mapper;
             _userManager = userManager;
             _doctorRepository = doctorRepository;
-            _timeSlotRepository = timeSlotRepository;            
+            _timeSlotRepository = timeSlotRepository;  
+            _patientRepository = patientRepository;
+            _appointmentRepository = appointmentRepository;
                      
         }
         public async Task<CreateTimeSlotDto> CreateTimeSlotAsync(CreateTimeSlotDto timeSlotDto, string userId)
@@ -188,10 +195,27 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             await _timeSlotRepository.UpdateAsync(existingSlot);
         }
 
-        public async Task<IEnumerable<TimeSlotsDto>> GetAllAvailableTimeSlotsAsync()
+        public async Task<IEnumerable<TimeSlotsDto>> GetAllAvailableTimeSlotsAsync(string userId)
         {
+            var patient = await _patientRepository.GetByUserIdAsync(userId);
+
             var timeSlots = await _timeSlotRepository.GetAvailableTimeSlotsAsync();
-            return _mapper.Map<List<TimeSlotsDto>>(timeSlots);
+
+            var bookedSlotIds = await _appointmentRepository
+                .GetAll()
+                .Where(a => a.PatientId == patient.Id &&
+                            a.Status == AppointmentStatus.Booked)
+                .Select(a => a.TimeSlotId)
+                .ToListAsync();
+
+            var dtos = _mapper.Map<List<TimeSlotsDto>>(timeSlots);
+
+            foreach (var dto in dtos)
+            {
+                dto.IsBookedByUser = bookedSlotIds.Contains(dto.Id);
+            }
+
+            return dtos;
         }
     }
 }

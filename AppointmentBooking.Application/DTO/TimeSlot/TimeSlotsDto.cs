@@ -20,5 +20,7 @@ namespace AppointmentBooking.Application.DTO.TimeSlot
 
         public int MaxPatients { get; set; }
         public int BookedCount { get; set; }
+
+        public bool IsBookedByUser { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace AppointmentBooking.Domain.Corntracts
     public interface IAppointmentRepository : IGenericRepository<Appointment>
     {
         Task UpdateAsync(Appointment appointment);
+        IQueryable<Appointment> GetAll();
         Task<Appointment> GetAppointmentDetailsByIdAsync(int appointmentId);
         Task<IEnumerable<Appointment>> GetAllAppointmentDetailsforAdminAsync();
         Task<IEnumerable<Appointment>> GetAllAppointmentDetailsforPatientAsync(int patientId);

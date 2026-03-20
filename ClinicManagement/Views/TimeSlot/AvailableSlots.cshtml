@@ -34,18 +34,33 @@
                 <td>@(slot.AvailableCount)</td>
 
                 <td>
-                    <form asp-controller="Appointment" asp-action="BookAppointment" method="post" style="display:inline;">
-
-                        @Html.AntiForgeryToken()
-
-                        <input type="hidden" name="TimeSlotId" value="@slot.Id" />
-
-                        <button type="submit"
-                                class="btn btn-success btn-sm"
-                                onclick="return confirm('Are you sure you want to book this slot?');">
-                            Book
+                    @if (slot.AvailableCount == 0)
+                    {
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            Full
                         </button>
-                    </form>
+                    }
+                    else if (slot.IsBookedByUser)
+                    {
+                        <button class="btn btn-success btn-sm" disabled title="You already booked this slot">
+                            Booked
+                        </button>
+                    }
+                    else
+                    {
+                        <form asp-controller="Appointment" asp-action="BookAppointment" method="post" style="display:inline;">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden" name="TimeSlotId" value="@slot.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm"
+                                    onclick="return confirm('Are you sure you want to book this slot?');">
+                                Book
+                            </button>
+                        </form>
+                    }
                 </td>
 
             </tr>

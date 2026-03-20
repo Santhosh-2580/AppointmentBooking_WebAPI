@@ -106,5 +106,10 @@ namespace AppointmentBooking.Infrastructure.Repositories
                     .ThenInclude(ts => ts.Doctor)
                 .FirstOrDefaultAsync(a => a.Id == appointmentId);
         }
+        
+        public IQueryable<Appointment> GetAll()
+        {
+            return _dbContext.Appointments;
+        }
     }
 }
