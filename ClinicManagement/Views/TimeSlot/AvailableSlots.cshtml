@@ -31,13 +31,21 @@
                 <td>@slot.Specialty</td>
                 <td>@slot.SlotDate</td>
                 <td>@slot.StartTime - @slot.EndTime</td>
-                <td>@(slot.MaxPatients - slot.BookedCount)</td>
+                <td>@(slot.AvailableCount)</td>
 
                 <td>
-                    <a class="btn btn-success btn-sm"
-                       href="/Appointment/Book/@slot.Id">
-                        Book
-                    </a>
+                    <form asp-controller="Appointment" asp-action="BookAppointment" method="post" style="display:inline;">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="TimeSlotId" value="@slot.Id" />
+
+                        <button type="submit"
+                                class="btn btn-success btn-sm"
+                                onclick="return confirm('Are you sure you want to book this slot?');">
+                            Book
+                        </button>
+                    </form>
                 </td>
 
             </tr>

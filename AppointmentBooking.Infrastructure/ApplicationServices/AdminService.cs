@@ -87,7 +87,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
         }
         public async Task<IEnumerable<AppointmentsDto>> GetAllAppointmentsAsync()
         {
-            var appointments = await _appointmentRepository.GetAppointmentDetailsAsync();
+            var appointments = await _appointmentRepository.GetAllAppointmentDetailsforAdminAsync();
 
             var patientIds = appointments.Select(a => a.Patient.UserId).Distinct().ToList();
 

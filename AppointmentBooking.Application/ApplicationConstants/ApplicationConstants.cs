@@ -45,6 +45,10 @@ namespace AppointmentBooking.Application.ApplicationConstants
         public const string AppointementCancelledSuccess = "Appointment cancelled successfully.";
         public const string AppointementCancellationFailed = "Failed to cancel the appointment.";
 
+        public const string GetRecordSuccess = "Records fetched successfully.";
+        public const string GetRecordFailure = "Failed to fetch records.";
 
+        public const string AppointementCompletedSuccess = "Appointment Completed successfully.";
+        public const string AppointementCompletedFailed = "Failed to complete the appointment.";
     }
 }

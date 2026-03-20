@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 
 namespace ClinicManagement.DTO.TimeSlot
 {
-    public class CreateTimeSlotDto
-    {        
+    public class CreateUpdateTimeSlotDto
+    {
+        public int Id { get; set; }
         public DateOnly SlotDate { get; set; }
         
         [DefaultValue("10:00:00")]

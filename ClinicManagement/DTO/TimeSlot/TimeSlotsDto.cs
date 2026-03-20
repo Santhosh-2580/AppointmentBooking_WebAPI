@@ -20,5 +20,7 @@ namespace ClinicManagement.DTO.TimeSlot
 
         public int MaxPatients { get; set; }
         public int BookedCount { get; set; }
+
+        public int AvailableCount => MaxPatients - BookedCount;
     }
 }

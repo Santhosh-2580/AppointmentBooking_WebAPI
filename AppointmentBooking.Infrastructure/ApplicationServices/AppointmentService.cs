@@ -158,28 +158,38 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
                 Status = appointment.Status
             };           
         }      
-
-        public async Task<IEnumerable<AppointmentsDto>> GetAllAppointmentsAsync()
-        {
-            var appointments = await _appointmentRepository.GetAppointmentDetailsAsync();
-            return _mapper.Map<IEnumerable<AppointmentsDto>>(appointments);
-        }
+              
 
         public async Task<AppointmentsDto> GetAppointmentByIdAsync(int id)
         {
-            var appointment = await _appointmentRepository.GetByIdAsync(x => x.Id == id);
-            return _mapper.Map<AppointmentsDto>(appointment);
-        }
+            var appointment = await _appointmentRepository
+                   .GetAppointmentDetailsByIdAsync(id);
 
-        public Task<List<AppointmentsDto>> GetAppointmentsForUserAsync(string userId, string role)
+            if (appointment == null)
+                throw new KeyNotFoundException("Appointment not found.");
+
+            return new AppointmentsDto
+            {
+                Id = appointment.Id,
+                DoctorName = appointment.TimeSlot.Doctor.DoctorName,
+                Specialty = appointment.TimeSlot.Doctor.Specialty,
+                SlotDate = appointment.TimeSlot.SlotDate,
+                StartTime = appointment.TimeSlot.StartTime,
+                EndTime = appointment.TimeSlot.EndTime,
+                
+            };
+        }       
+               
+
+        public Task<List<AppointmentsDto>> GetAppointmentsForUserDashboardAsync(string userId, string role)
         {
             if (role == "Patient")
             {
-                return GetAppointmentsForPatientAsync(userId);
+                return GetAppointmentsForPatientDashboardAsync(userId);
             }
             else if (role == "Doctor")
             {
-                return GetAppointmentsForDoctorAsync(userId);
+                return GetAppointmentsForDoctorDashboardAsync(userId);
             }
             else
             {
@@ -189,13 +199,13 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             throw new NotImplementedException();
         }
 
-        private async Task<List<AppointmentsDto>> GetAppointmentsForDoctorAsync(string userId)
+        private async Task<List<AppointmentsDto>> GetAppointmentsForDoctorDashboardAsync(string userId)
         {
             var doctor = await _doctorRepository.GetByUserIdAsync(userId);
             if (doctor == null)
                 throw new UnauthorizedAccessException("Doctor not found.");
 
-            var appointments = await _appointmentRepository.GetAppointmentsByDoctorIdAsync(doctor.Id);
+            var appointments = await _appointmentRepository.GetUpcomingAppointmentsByDoctorIdAsync(doctor.Id);
 
             var patientIds = appointments.Select(a => a.Patient.UserId).Distinct().ToList();
 
@@ -232,13 +242,13 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             }).ToList();
         }
 
-        private async Task<List<AppointmentsDto>> GetAppointmentsForPatientAsync(string userId)
+        private async Task<List<AppointmentsDto>> GetAppointmentsForPatientDashboardAsync(string userId)
         {
             var patient = await _patientRepository.GetByUserIdAsync(userId);
             if (patient == null)
                 throw new UnauthorizedAccessException("Patient not found.");
 
-            var appointments = await _appointmentRepository.GetAppointmentsByPatientIdAsync(patient.Id);
+            var appointments = await _appointmentRepository.GetUpcomingAppointmentsforPatientDashboard(patient.Id);
             var user = await _userManager.FindByIdAsync(userId);
 
             return appointments.Select(a => new AppointmentsDto
@@ -264,7 +274,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
             }).ToList();
         }
 
-        public async Task RescheduleAppointmentAsync(string userId, RescheduleAppointmentDto dto, int appointmentId)
+        public async Task RescheduleAppointmentAsync(string userId, RescheduleAppointmentDto dto)
         {
             await _unitOfWork.BeginTransactionAsync();
 
@@ -277,7 +287,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
 
                 // Get Appointment
                 var appointment = await _appointmentRepository
-                    .GetByIdAsync(a => a.Id == appointmentId);
+                    .GetByIdAsync(a => a.Id == dto.AppointmentId);
 
                 if (appointment == null)
                     throw new KeyNotFoundException("Appointment not found.");
@@ -289,7 +299,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
                 // Only Booked appointments can be rescheduled
                 if (appointment.Status != AppointmentStatus.Booked)
                     throw new InvalidOperationException("Only booked appointments can be rescheduled.");
-
+                
                 //Prevent rescheduling to same slot
                 if (appointment.TimeSlotId == dto.NewTimeSlotId)
                     throw new InvalidOperationException("Already booked in this TimeSlot.");
@@ -339,6 +349,114 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
                 throw;
             }
         }
-       
+
+        public async Task MarkasCompletedAsync(int appointmentId)
+        {
+            var appointment = await _appointmentRepository
+                    .GetByIdAsync(a => a.Id == appointmentId);
+
+            if(appointment == null)
+                throw new KeyNotFoundException("Appointment not found.");
+
+            if (appointment.Status != AppointmentStatus.Booked)
+                throw new InvalidOperationException("Only booked appointments can be completd");
+
+            appointment.Status = AppointmentStatus.Completed;
+
+            await _appointmentRepository.UpdateAsync(appointment);
+
+        }
+        
+        public async Task<List<AppointmentsDto>> GetAllAppointmentsOfUsersAsync(string userId, string role)
+        {
+            if (role == "Patient")
+            {
+                return await GetAllAppointmentsforPatientAsync(userId);
+            }
+            else if (role == "Doctor")
+            {
+                return await GetAllAppointmentsForDoctorAsync(userId);
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("Invalid role");
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<AppointmentsDto>> GetAllAppointmentsforPatientAsync(string userId)
+        {
+            var patient = await _patientRepository.GetByUserIdAsync(userId);
+            if (patient == null)
+                throw new UnauthorizedAccessException("Patient not found.");
+
+            var appointments = await _appointmentRepository.GetAllAppointmentDetailsforPatientAsync(patient.Id);
+            var user = await _userManager.FindByIdAsync(userId);
+
+            return appointments.Select(a => new AppointmentsDto
+            {
+                Id = a.Id,
+
+                PatientId = a.PatientId,
+                PatientName = user.FirstName + " " + user.LastName,
+                MobileNumber = a.Patient.MobileNumber,
+                Gender = a.Patient.Gender,
+                Age = AgeHelper.CalculateAge(a.Patient.DateOfBirth),
+
+                TimeSlotId = a.TimeSlotId,
+                SlotDate = a.TimeSlot.SlotDate,
+                StartTime = a.TimeSlot.StartTime,
+                EndTime = a.TimeSlot.EndTime,
+
+                DoctorId = a.TimeSlot.DoctorId,
+                DoctorName = a.TimeSlot.Doctor.DoctorName,
+                Specialty = a.TimeSlot.Doctor.Specialty,
+
+                Status = a.Status
+            }).ToList();
+        }
+        private async Task<List<AppointmentsDto>> GetAllAppointmentsForDoctorAsync(string userId)
+        {
+            var doctor = await _doctorRepository.GetByUserIdAsync(userId);
+            if (doctor == null)
+                throw new UnauthorizedAccessException("Doctor not found.");
+
+            var appointments = await _appointmentRepository.GetAllAppointmentDetailsforDoctorAsync(doctor.Id);
+
+            var patientIds = appointments.Select(a => a.Patient.UserId).Distinct().ToList();
+
+            var users = await _userManager.Users.Where(u => patientIds.Contains(u.Id)).ToListAsync();
+
+
+            return appointments.Select(a =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == a.Patient.UserId);
+
+                return new AppointmentsDto
+                {
+
+                    Id = a.Id,
+
+                    DoctorId = doctor.Id,
+                    DoctorName = doctor.DoctorName,
+                    Specialty = doctor.Specialty,
+
+                    TimeSlotId = a.TimeSlotId,
+                    SlotDate = a.TimeSlot.SlotDate,
+                    StartTime = a.TimeSlot.StartTime,
+                    EndTime = a.TimeSlot.EndTime,
+
+                    PatientId = a.PatientId,
+                    PatientName = user != null ? user.FirstName + " " + user.LastName : "Unknown",
+                    MobileNumber = a.Patient.MobileNumber,
+                    Gender = a.Patient.Gender,
+                    Age = AgeHelper.CalculateAge(a.Patient.DateOfBirth),
+
+                    Status = a.Status
+                };
+
+            }).ToList();
+        }
     }
 }

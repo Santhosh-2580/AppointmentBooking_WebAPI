@@ -100,7 +100,7 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <returns>An ActionResult containing an APIResponse with the user's appointments.</returns>
         [Authorize(Roles ="Doctor,Patient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpGet("MyAppointments")]
+        [HttpGet("upcomingAppointments")]
         public async Task<ActionResult<APIResponse>> GetMyAppointments()
         {
             try
@@ -109,7 +109,7 @@ namespace AppointmentBooking.Web.Controllers.v1
                 var role = User.FindFirstValue(ClaimTypes.Role);
                 var userName = User.Identity.Name;
 
-                var Appointments = await _appointmentService.GetAppointmentsForUserAsync(userId, role);
+                var Appointments = await _appointmentService.GetAppointmentsForUserDashboardAsync(userId, role);
 
                 if (Appointments == null || !Appointments.Any())
                 {
@@ -133,6 +133,48 @@ namespace AppointmentBooking.Web.Controllers.v1
             catch (Exception)
             {
                 _response.StatusCode = HttpStatusCode.InternalServerError;                
+                _response.AddError(CommonMessages.SystemError);
+                _logger.LogError("An error occurred while retrieving appointments: {ErrorMessage}", CommonMessages.SystemError);
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+
+        }
+
+        [Authorize(Roles = "Doctor,Patient")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpGet("UsersAppointments")]
+        public async Task<ActionResult<APIResponse>> GetAllAppointmentDetailsOfUsersAsync()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var role = User.FindFirstValue(ClaimTypes.Role);
+                var userName = User.Identity.Name;
+
+                var Appointments = await _appointmentService.GetAllAppointmentsOfUsersAsync(userId, role);
+
+                if (Appointments == null || !Appointments.Any())
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.DisplayMessage = CommonMessages.RecordNotFound;
+
+                    _logger.LogInformation($"No appointments found for {userName}");
+                    return NotFound(_response);
+                }
+                else
+                {
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.IsSuccess = true;
+                    _response.Result = Appointments;
+
+                    _logger.LogInformation($"Retrieved {Appointments.Count()} appointments for {userName}");
+                    return Ok(_response);
+                }
+
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.AddError(CommonMessages.SystemError);
                 _logger.LogError("An error occurred while retrieving appointments: {ErrorMessage}", CommonMessages.SystemError);
                 return StatusCode(StatusCodes.Status500InternalServerError, _response);
@@ -202,8 +244,8 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <param name="appointmentId"></param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpPatch("{AppointmentId}/reschedule")]       
-        public async Task<ActionResult<APIResponse>> RescheduleAppointment(RescheduleAppointmentDto rescheduleAppointmentDto, int appointmentId)
+        [HttpPatch("reschedule")]       
+        public async Task<ActionResult<APIResponse>> RescheduleAppointment(RescheduleAppointmentDto rescheduleAppointmentDto)
         {
             try
             {
@@ -228,7 +270,7 @@ namespace AppointmentBooking.Web.Controllers.v1
                 else
                 {
                     var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
-                    await _appointmentService.RescheduleAppointmentAsync(userId, rescheduleAppointmentDto,appointmentId);
+                    await _appointmentService.RescheduleAppointmentAsync(userId, rescheduleAppointmentDto);
 
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.DisplayMessage = CommonMessages.AppointementRescheduledSuccess;
@@ -350,6 +392,111 @@ namespace AppointmentBooking.Web.Controllers.v1
                 return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }            
         }
+
+        [Authorize(Roles = "Doctor")]
+        [HttpPatch("{AppointmentId}/Complete")]
+        public async Task<IActionResult> MarkasCompletAppointmentasync(int AppointmentId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.AppointementCompletedFailed;
+
+                    var errors = ModelState.Values
+                               .SelectMany(v => v.Errors)
+                               .Select(e => e.ErrorMessage);
+
+                    foreach (var error in errors)
+                    {
+                        _response.AddError(error);
+                    }
+                    _response.IsSuccess = false;
+
+                    _logger.LogWarning("Invalid model state for completing appointment: {ModelState}", ModelState);
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userName = User.Identity.Name;
+
+                    await _appointmentService.MarkasCompletedAsync(AppointmentId);
+
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.DisplayMessage = CommonMessages.AppointementCompletedSuccess;
+                    _response.IsSuccess = true;
+
+                    _logger.LogInformation($"Appointment with ID {AppointmentId} marked as completed by user {userName}");
+                    return Ok(_response);
+                }
+
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.AppointementCompletedFailed;
+                _response.AddError(CommonMessages.SystemError);
+
+                _logger.LogError("An error occurred while completing an appointment: {ErrorMessage}", CommonMessages.SystemError);
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [Authorize(Roles = "Patient")]
+        [HttpGet("{appointmentId}/AppointmentDetailsById")]
+        public async Task<IActionResult> GetAppointmentDetailsById(int appointmentId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.GetRecordFailure;
+
+                    var errors = ModelState.Values
+                               .SelectMany(v => v.Errors)
+                               .Select(e => e.ErrorMessage);
+
+                    foreach (var error in errors)
+                    {
+                        _response.AddError(error);
+                    }
+                    _response.IsSuccess = false;
+
+                    _logger.LogWarning("Invalid model state for getting appointment details: {ModelState}", ModelState);
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userName = User.Identity.Name;
+
+                   var appointment = await _appointmentService.GetAppointmentByIdAsync(appointmentId);
+
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.DisplayMessage = CommonMessages.GetRecordSuccess;
+                    _response.IsSuccess = true;
+                    _response.Result = appointment;
+
+                    _logger.LogInformation($"Appointment with ID {appointmentId} retrieved successfully by user {userName}");
+                    return Ok(_response);
+                }
+
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.GetRecordFailure;
+                _response.AddError(CommonMessages.SystemError);
+
+                _logger.LogError("An error occurred while getting an appointment: {ErrorMessage}", CommonMessages.SystemError);
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+
 
     }
 }

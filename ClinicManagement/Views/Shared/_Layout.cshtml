@@ -63,6 +63,11 @@
                                 <i class="bi bi-calendar"></i> Available Slots
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Appointment" asp-action="Appointments">
+                                <i class="bi bi-clipboard-check"></i>My Appointments
+                            </a>
+                        </li>
 
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Patient" asp-action="ViewPatientProfile">
@@ -77,23 +82,17 @@
                             <a class="nav-link" asp-controller="Dashboard" asp-action="DoctorDashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
-                        </li>
+                        </li>                       
 
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Timeslot" asp-action="Create">
-                                <i class="bi bi-plus-circle"></i> Create Timeslot
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Timeslot" asp-action="MySlots">
+                            <a class="nav-link" asp-controller="TimeSlot" asp-action="MyTimeSlots">
                                 <i class="bi bi-calendar-check"></i> My Timeslots
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Appointment" asp-action="DoctorAppointments">
-                                <i class="bi bi-clipboard-check"></i> Appointments
+                            <a class="nav-link" asp-controller="Appointment" asp-action="Appointments">
+                                <i class="bi bi-clipboard-check"></i>My Appointments
                             </a>
                         </li>
                     }

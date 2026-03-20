@@ -16,15 +16,17 @@ namespace ClinicManagement.Controllers
         }
         public async Task<IActionResult> DoctorDashboard()
         {
-            var appointments = await _appointmentService.GetMyAppointmentsasync();
+            var response = await _appointmentService.GetMyAppointmentsasync();
 
-            return View(appointments);
+            return View(response.Result);
         }
         public async Task<IActionResult> PatientDashboard()
         {
-            var appointments = await _appointmentService.GetMyAppointmentsasync();
+            var response = await _appointmentService.GetMyAppointmentsasync();
 
-            return View(appointments);
+            
+
+            return View(response.Result);
         }
     }
 }

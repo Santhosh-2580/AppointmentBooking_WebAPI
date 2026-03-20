@@ -1,6 +1,8 @@
 ﻿@using ClinicManagement.DTO.Appointment
 @model List<AppointmentsDto>
 
+
+
     @if(Model != null && Model.Any())
 {
     <h3 class="mb-4">My Upcoming Appointments</h3>
@@ -16,6 +18,7 @@
                 <th>Appointment Date</th>
                 <th>Slot Time</th>
                 <th>Status</th>
+                <th>Action</th>
             </tr>
 
         </thead>
@@ -31,6 +34,23 @@
                     <td>@item.SlotDate</td>
                     <td>@item.StartTime - @item.EndTime</td>
                     <td>@item.Status</td>
+                    
+                    <td>
+                        <form asp-controller="Appointment" asp-action="CancelAppointment" asp-route-id="@item.Id" method="post" style="display:inline;">
+                            <button type="submit"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                                Cancel
+                            </button>
+                        </form>
+
+                        <a asp-controller="Appointment"
+                           asp-action="AppointmentReschedule"
+                           asp-route-appointmentId="@item.Id"
+                           class="btn btn-sm btn-warning me-1">
+                            Reschedule
+                        </a>
+                    </td>
 
                 </tr>
             }
@@ -42,7 +62,7 @@
 else
 {
     <div class="alert alert-info">
-        You have no upcoming appointments.
+        You have no upcoming appointments. 
     </div>
 }
 

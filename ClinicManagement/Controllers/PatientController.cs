@@ -1,4 +1,5 @@
 ﻿using ClinicManagement.DTO.Patient;
+using ClinicManagement.Helper;
 using ClinicManagement.Services.Patient;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,8 +21,15 @@ namespace ClinicManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> ViewPatientProfile()
         {
-            var myProfile = await _patientService.GetMyProfile();
-            return View(myProfile);
+            var response = await _patientService.GetMyProfile();
+
+            if (response == null || response.Result == null)
+            {
+                ToastHelper.Error(TempData, "Profile not found");                
+                return View(null);
+            }
+
+            return View(response.Result);
         }
 
         [HttpGet]

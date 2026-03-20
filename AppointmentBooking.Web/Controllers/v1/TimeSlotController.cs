@@ -166,12 +166,14 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <summary>
         /// updates the details of an existing time slot for the authenticated doctor. The doctor can update the date, start time, end time, and maximum number of patients for the time slot. The method validates the input and returns appropriate responses based on the success or failure of the update operation.
         /// </summary>
-        /// <param name="doctor"></param>
+        /// <param name="dto"></param>
+        /// <param name="timeslotId"></param>
+        /// <param name="dto"></param>
         /// <returns></returns>
         [Authorize(Roles = "Doctor")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPatch("{timeslotId}/update")]
-        public async Task<ActionResult<APIResponse>> UpdateTimeSlot(UpdateTimeSlotDto doctor, int timeslotId)
+        public async Task<ActionResult<APIResponse>> UpdateTimeSlot(int timeslotId,UpdateTimeSlotDto dto)
         {
             try
             {
@@ -185,7 +187,7 @@ namespace AppointmentBooking.Web.Controllers.v1
                 {
                     var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
 
-                    await _timeSlotService.UpdateTimeSlotAsync(userId, doctor, timeslotId);
+                    await _timeSlotService.UpdateTimeSlotAsync(userId, dto, timeslotId);
 
                     _response.StatusCode = HttpStatusCode.Created;
                     _response.DisplayMessage = CommonMessages.UpdateOperationSuccess;
@@ -210,51 +212,95 @@ namespace AppointmentBooking.Web.Controllers.v1
         /// <param name="slotId">The unique identifier of the time slot to delete.</param>
         /// <returns>An API response indicating the result of the delete operation.</returns>
         [Authorize(Roles = "Doctor")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [HttpDelete("{slotId}")]
         public async Task<ActionResult<APIResponse>> DeleteTimeSlot(int slotId)
         {
-
             try
             {
                 if (slotId == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
-                    _response.AddError(ModelState.ToString());
+                    _response.AddError("Invalid Slot Id");
+
+                    return BadRequest(_response);
                 }
-                else
+
+                var slot = await _timeSlotService.GetTimeSlotByIdAsync(slotId);
+
+                if (slot == null)
                 {
-                    var doctor = await _timeSlotService.GetTimeSlotByIdAsync(slotId);
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.DisplayMessage = CommonMessages.RecordNotFound;
+                    _response.AddError("Slot not found");
 
-                    if (doctor == null)
-                    {
-                        _response.StatusCode = HttpStatusCode.NotFound;
-                        _response.DisplayMessage = CommonMessages.RecordNotFound;
-                        _response.AddError(ModelState.ToString());
-                    }
-                    else
-                    {
-                        var userId = User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
+                    return NotFound(_response);
+                }
 
-                        await _timeSlotService.DeleteTimeSlotAsync(userId, slotId);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                        _response.StatusCode = HttpStatusCode.NoContent;
-                        _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
-                        _response.IsSuccess = true;
-                    }                    
-                }                    
+                await _timeSlotService.DeleteTimeSlotAsync(userId, slotId);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.DisplayMessage = CommonMessages.DeleteOperationSuccess;
+                _response.IsSuccess = true;               
+                return Ok(_response);
 
             }
-            catch(Exception)
+            catch (Exception)
             {
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.DisplayMessage = CommonMessages.DeleteOperationFailed;
                 _response.AddError(CommonMessages.SystemError);
-            }           
 
-            return Ok(_response);
+                return StatusCode(500, _response);
+            }
+        }
 
+
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpGet("{slotId}")]
+        public async Task<ActionResult<APIResponse>> GetTimeSlotById(int slotId)
+        {
+            try
+            {
+                if (slotId == 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.DisplayMessage = CommonMessages.GetRecordFailure;
+                    _response.AddError("Invalid Slot Id");
+
+                    return BadRequest(_response); 
+                }
+
+                var slot = await _timeSlotService.GetTimeSlotByIdAsync(slotId);
+
+                if (slot == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.DisplayMessage = CommonMessages.RecordNotFound;
+                    _response.AddError("Slot not found");
+
+                    return NotFound(_response); 
+                }
+
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.DisplayMessage = CommonMessages.GetRecordSuccess;
+                _response.IsSuccess = true;
+                _response.Result = slot;
+
+                return Ok(_response); 
+            }
+            catch (Exception)
+            {
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.DisplayMessage = CommonMessages.GetRecordFailure;
+                _response.AddError(CommonMessages.SystemError);
+
+                return StatusCode(500, _response); 
+            }
         }
 
     }

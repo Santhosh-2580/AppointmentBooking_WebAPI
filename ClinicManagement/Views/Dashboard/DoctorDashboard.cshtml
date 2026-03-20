@@ -17,6 +17,7 @@
                 <th>Appointment Date</th>
                 <th>Slot Time</th>
                 <th>Status</th>
+                <th>Action</th>
             </tr>
 
         </thead>
@@ -33,6 +34,15 @@
                     <td>@item.SlotDate</td>
                     <td>@item.StartTime - @item.EndTime</td>
                     <td>@item.Status</td>
+
+                    <td>
+                        <form asp-controller="Appointment" asp-action="MarkAsCompleted" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-success">
+                                Complete
+                            </button>
+                        </form>
+                    </td>
 
                 </tr>
             }
