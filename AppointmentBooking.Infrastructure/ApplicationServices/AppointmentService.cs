@@ -176,6 +176,7 @@ namespace AppointmentBooking.Infrastructure.ApplicationServices
                 SlotDate = appointment.TimeSlot.SlotDate,
                 StartTime = appointment.TimeSlot.StartTime,
                 EndTime = appointment.TimeSlot.EndTime,
+                TimeSlotId = appointment.TimeSlotId
                 
             };
         }       

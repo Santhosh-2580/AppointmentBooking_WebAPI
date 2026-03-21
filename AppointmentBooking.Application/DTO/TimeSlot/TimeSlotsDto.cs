@@ -22,5 +22,6 @@ namespace AppointmentBooking.Application.DTO.TimeSlot
         public int BookedCount { get; set; }
 
         public bool IsBookedByUser { get; set; }
+        public bool IsCompleted { get; set; }
     }
 }

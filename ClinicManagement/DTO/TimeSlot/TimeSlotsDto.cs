@@ -24,5 +24,6 @@ namespace ClinicManagement.DTO.TimeSlot
         public int AvailableCount => MaxPatients - BookedCount;
 
         public bool IsBookedByUser { get; set; }
+        public bool IsCompleted { get; set; }
     }
 }

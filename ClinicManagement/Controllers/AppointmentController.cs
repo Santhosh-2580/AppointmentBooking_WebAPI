@@ -110,6 +110,8 @@ namespace ClinicManagement.Controllers
             ViewBag.OldStartTime = appointment.StartTime;
             ViewBag.OldEndTime = appointment.EndTime;
 
+            ViewBag.OldSlotId = appointment.TimeSlotId;
+
             // Prepare model
             var model = new RescheduleAppointmentDto
             {

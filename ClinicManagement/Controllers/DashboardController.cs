@@ -1,4 +1,5 @@
 ﻿using ClinicManagement.Services.Appointment;
+using ClinicManagement.Services.Patient;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClinicManagement.Controllers
@@ -6,9 +7,11 @@ namespace ClinicManagement.Controllers
     public class DashboardController : Controller
     {
         private readonly AppointmentService _appointmentService;
-        public DashboardController(AppointmentService appointmentService)
+        private readonly PatientService _patientService;
+        public DashboardController(AppointmentService appointmentService,PatientService patientService)
         {
             _appointmentService = appointmentService;
+            _patientService = patientService;
         }
         public IActionResult AdminDashboard()
         {
@@ -22,11 +25,13 @@ namespace ClinicManagement.Controllers
         }
         public async Task<IActionResult> PatientDashboard()
         {
-            var response = await _appointmentService.GetMyAppointmentsasync();
+            var appointmentResponse = await _appointmentService.GetMyAppointmentsasync();
 
-            
+            var patientProfileResponse = await _patientService.GetMyProfile();
 
-            return View(response.Result);
+            ViewBag.HasProfile = patientProfileResponse != null && patientProfileResponse.IsSuccess && patientProfileResponse.Result != null;            
+
+            return View(appointmentResponse.Result);
         }
     }
 }

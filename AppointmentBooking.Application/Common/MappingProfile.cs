@@ -25,7 +25,12 @@ namespace AppointmentBooking.Application.Common
             CreateMap<TimeSlot, UpdateTimeSlotDto>().ReverseMap();
             CreateMap<TimeSlot, TimeSlotsDto>()
                 .ForMember(x => x.DoctorName, opt => opt.MapFrom(src => src.Doctor.DoctorName))
-                .ForMember(x => x.Specialty, opt => opt.MapFrom(src => src.Doctor.Specialty));
+                .ForMember(x => x.Specialty, opt => opt.MapFrom(src => src.Doctor.Specialty))
+                 .AfterMap((src, dest) =>
+                 {
+                     var slotDateTime = src.SlotDate.ToDateTime(TimeOnly.FromTimeSpan(src.StartTime));
+                     dest.IsCompleted = slotDateTime < DateTime.Now;
+                 });
 
             CreateMap<Patient, CreatePatientProfileDto>().ReverseMap();
             CreateMap<Patient, UpdatePatientDto>().ReverseMap();

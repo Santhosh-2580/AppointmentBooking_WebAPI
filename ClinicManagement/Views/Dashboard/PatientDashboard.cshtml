@@ -1,9 +1,17 @@
 ﻿@using ClinicManagement.DTO.Appointment
 @model List<AppointmentsDto>
 
+@if(!(bool)ViewBag.HasProfile)
+{
+    <div class="alert alert-warning d-flex justify-content-between align-items-center">
+        <span>Please create your profile to book appointments.</span>
+        <a asp-controller="Patient" asp-action="CreatePatientProfile" class="btn btn-primary btn-sm">
+            Create Profile
+        </a>
+    </div>
+}
 
-
-    @if(Model != null && Model.Any())
+else if(Model != null && Model.Any())
 {
     <h3 class="mb-4">My Upcoming Appointments</h3>
 

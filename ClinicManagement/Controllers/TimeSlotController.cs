@@ -1,5 +1,6 @@
 ﻿using ClinicManagement.DTO.TimeSlot;
 using ClinicManagement.Helper;
+using ClinicManagement.Services.Patient;
 using ClinicManagement.Services.TimeSlot;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,12 @@ namespace ClinicManagement.Controllers
     public class TimeSlotController : Controller
     {
         private readonly TimeSlotService _timeSlotService;
+        private readonly PatientService _patientService;
 
-        public TimeSlotController(TimeSlotService timeSlotService)
+        public TimeSlotController(TimeSlotService timeSlotService, PatientService patientService)
         {
             _timeSlotService = timeSlotService;
+            _patientService = patientService;
         }
 
         public IActionResult Index()
@@ -21,8 +24,21 @@ namespace ClinicManagement.Controllers
 
         public async Task<IActionResult> AvailableSlots()
         {
-            var response = await _timeSlotService.GetAvailableSlots();
-            return View(response.Result);
+            var patientProfileResponse = await _patientService.GetMyProfile();
+
+            if(patientProfileResponse != null && patientProfileResponse.IsSuccess && patientProfileResponse.Result != null)
+            {
+                var response = await _timeSlotService.GetAvailableSlots();
+                return View(response.Result ?? new List<TimeSlotsDto>());
+            }
+
+            else
+            {
+                ToastHelper.Warning(TempData, "Please create profile to view available slots.");
+                return RedirectToAction("PatientDashboard", "Dashboard");
+            }
+
+            
         }
 
         [HttpGet]

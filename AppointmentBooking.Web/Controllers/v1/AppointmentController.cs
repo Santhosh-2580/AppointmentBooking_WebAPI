@@ -446,7 +446,7 @@ namespace AppointmentBooking.Web.Controllers.v1
 
         [Authorize(Roles = "Patient")]
         [HttpGet("{appointmentId}/AppointmentDetailsById")]
-        public async Task<IActionResult> GetAppointmentDetailsById(int appointmentId)
+        public async Task<ActionResult<APIResponse>> GetAppointmentDetailsById(int appointmentId)
         {
             try
             {

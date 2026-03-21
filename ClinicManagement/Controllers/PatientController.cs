@@ -33,15 +33,30 @@ namespace ClinicManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult CreatePatientProfile()
+        public async Task<IActionResult> CreatePatientProfile()
         {
+            var response = await _patientService.GetMyProfile();
+           
+            if (response != null && response.IsSuccess && response.Result != null)
+            {
+                ToastHelper.Info(TempData, "Profile already exists!");
+                return RedirectToAction("ViewPatientProfile");
+            }
+
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> CreatePatientProfile(CreatePatientProfileDto model)
         {
-            await _patientService.CreateMyProfile(model);
+            var response = await _patientService.CreateMyProfile(model);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError("", response.DisplayMessage);
+                return View(model);
+            }
+
             return RedirectToAction("ViewPatientProfile");
         }
     }
